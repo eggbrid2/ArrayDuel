@@ -1,11 +1,12 @@
-const CACHE_NAME = "array-duel-v6";
+const CACHE_NAME = "array-duel-v7";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
-  "./icon.svg"
+  "./icon.svg",
+  "./assets/array-duel-loop.wav"
 ];
 
 self.addEventListener("install", (event) => {

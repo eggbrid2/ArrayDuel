@@ -77,6 +77,26 @@ button:disabled {
   color: rgba(255, 253, 247, 0.7);
 }
 
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.music-toggle {
+  min-height: 40px;
+  padding: 0 12px;
+  border-color: rgba(229, 197, 116, 0.35);
+  background: rgba(255, 253, 247, 0.1);
+  color: #fffdf7;
+  white-space: nowrap;
+}
+
+.music-toggle[aria-pressed="true"] {
+  background: #d9b45f;
+  color: #171b17;
+}
+
 .round-panel {
   min-width: 132px;
   padding: 10px 14px;
@@ -613,6 +633,16 @@ dialog h2 {
     background: rgba(16, 20, 19, 0.94);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .topbar-right {
+    gap: 6px;
+  }
+
+  .music-toggle {
+    min-height: 34px;
+    padding: 0 8px;
+    font-size: 12px;
   }
 
   .topbar h1 {

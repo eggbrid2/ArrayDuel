@@ -999,4 +999,41 @@ document.querySelector("#activateBtn").addEventListener("click", () => activate(
 document.querySelector("#replaceBtn").addEventListener("click", () => placeSelectedHand());
 document.querySelector("#endBtn").addEventListener("click", () => nextPhase());
 
+function initMusic() {
+  const audio = document.querySelector("#bgm");
+  const button = document.querySelector("#musicToggle");
+  if (!audio || !button) return;
+  audio.volume = 0.42;
+  const update = (enabled) => {
+    button.textContent = enabled ? "乐 On" : "乐 Off";
+    button.setAttribute("aria-pressed", String(enabled));
+  };
+  const saved = localStorage.getItem("arrayDuelMusic") === "on";
+  update(saved);
+  if (saved) {
+    audio.play().catch(() => {
+      localStorage.setItem("arrayDuelMusic", "off");
+      update(false);
+    });
+  }
+  button.addEventListener("click", async () => {
+    if (audio.paused) {
+      try {
+        await audio.play();
+        localStorage.setItem("arrayDuelMusic", "on");
+        update(true);
+      } catch {
+        localStorage.setItem("arrayDuelMusic", "off");
+        update(false);
+        log("浏览器阻止了自动播放，请再点一次背景音乐。");
+      }
+    } else {
+      audio.pause();
+      localStorage.setItem("arrayDuelMusic", "off");
+      update(false);
+    }
+  });
+}
+
+initMusic();
 setup();
