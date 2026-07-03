@@ -275,9 +275,23 @@ button:disabled {
 }
 
 .slot-header span:first-child {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.slot-type {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.95);
+  color: var(--slot-color);
+  font-weight: 900;
 }
 
 .stones {
@@ -611,7 +625,7 @@ dialog h2 {
 
   body {
     min-height: 100svh;
-    padding-bottom: calc(78px + var(--safe-bottom));
+    padding-bottom: calc(92px + var(--safe-bottom));
     background:
       radial-gradient(circle at 50% 8%, rgba(247, 243, 232, 0.1), transparent 20rem),
       linear-gradient(180deg, #101413, #151d1a 46%, #101419);
@@ -694,53 +708,58 @@ dialog h2 {
 
   .board {
     width: min(100%, 346px);
-    min-height: 252px;
+    min-height: 224px;
     max-height: none;
-    aspect-ratio: 1.46 / 1;
+    aspect-ratio: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 66px);
+    gap: 8px;
+    padding: 10px;
     border: 1px solid rgba(47, 53, 45, 0.14);
     border-radius: 14px;
     background:
-      radial-gradient(circle at 50% 51%, rgba(255, 253, 247, 0.78) 0 14%, transparent 14.5%),
-      radial-gradient(circle at 50% 51%, transparent 0 32%, rgba(64, 65, 54, 0.07) 32.4% 33%, transparent 33.5%),
-      linear-gradient(90deg, transparent 49.8%, rgba(64, 65, 54, 0.08) 50%, transparent 50.2%),
-      linear-gradient(180deg, transparent 49.8%, rgba(64, 65, 54, 0.08) 50%, transparent 50.2%),
+      radial-gradient(circle at 50% 50%, rgba(255, 253, 247, 0.72) 0 18%, transparent 18.5%),
+      linear-gradient(90deg, transparent 32.8%, rgba(64, 65, 54, 0.08) 33%, transparent 33.3%, transparent 66.4%, rgba(64, 65, 54, 0.08) 66.7%, transparent 67%),
+      linear-gradient(180deg, transparent 32.8%, rgba(64, 65, 54, 0.08) 33%, transparent 33.3%, transparent 66.4%, rgba(64, 65, 54, 0.08) 66.7%, transparent 67%),
       linear-gradient(180deg, rgba(255, 253, 247, 0.3), rgba(255, 253, 247, 0.08));
     box-shadow: inset 0 0 0 4px rgba(255, 253, 247, 0.22);
   }
 
   .board::before,
   .board::after {
-    inset: 12%;
-    opacity: 0.42;
+    display: none;
   }
 
   .slot {
-    width: 25%;
-    height: 27%;
-    min-height: 62px;
+    position: relative;
+    width: 100%;
+    height: 66px;
+    min-height: 60px;
     border-width: 1.5px;
     border-radius: 9px;
     background:
       linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(239, 232, 209, 0.96)),
       color-mix(in srgb, var(--slot-color) 12%, white);
     box-shadow: 0 7px 13px rgba(24, 32, 29, 0.17);
+    transform: none;
   }
 
   .slot::before {
     display: none;
   }
 
-  .slot-wood { left: 20%; top: 32%; }
-  .slot-fire { left: 50%; top: 17%; }
-  .slot-earth { left: 80%; top: 32%; }
-  .slot-metal { left: 69%; top: 81%; }
-  .slot-water { left: 31%; top: 81%; }
+  .slot-wood { grid-column: 1; grid-row: 2; }
+  .slot-fire { grid-column: 2; grid-row: 1; }
+  .slot-earth { grid-column: 3; grid-row: 2; }
+  .slot-metal { grid-column: 3; grid-row: 3; }
+  .slot-water { grid-column: 1; grid-row: 3; }
   .slot-core {
-    left: 50%;
-    top: 53%;
-    width: 20%;
-    height: 21%;
-    min-height: 52px;
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    height: 66px;
+    min-height: 60px;
     border-radius: 999px;
     box-shadow: 0 0 0 3px rgba(255, 253, 247, 0.58), 0 8px 14px rgba(24, 32, 29, 0.18);
   }
@@ -750,14 +769,21 @@ dialog h2 {
   }
 
   .slot-header {
-    height: 18px;
-    padding: 2px 5px;
+    height: 19px;
+    padding: 2px 4px;
     font-size: 10px;
     line-height: 1;
   }
 
+  .slot-type {
+    min-width: 17px;
+    height: 17px;
+    margin-left: 2px;
+    font-size: 10px;
+  }
+
   .stones {
-    min-width: 24px;
+    display: none;
   }
 
   .stone-dot {
@@ -766,37 +792,34 @@ dialog h2 {
   }
 
   .card {
-    height: calc(100% - 18px);
+    height: calc(100% - 19px);
     gap: 2px;
-    padding: 4px 5px;
+    padding: 4px 5px 3px;
     justify-content: flex-start;
     background: rgba(255, 253, 247, 0.74);
   }
 
   .card-name {
-    max-width: calc(100% - 22px);
+    max-width: calc(100% - 24px);
     padding-right: 0;
     font-size: 11px;
-    line-height: 1.1;
+    line-height: 1.12;
     color: #2a2f2b;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     overflow: hidden;
-    word-break: keep-all;
+    word-break: break-all;
     text-shadow: none;
   }
 
   .type-mark {
-    right: 4px;
-    top: 21px;
-    width: 19px;
-    height: 19px;
-    font-size: 10px;
+    display: none;
   }
 
   .detail-button {
-    right: 4px;
-    bottom: 4px;
+    right: 3px;
+    bottom: 3px;
     width: 22px;
     height: 18px;
     border-color: rgba(24, 32, 29, 0.12);
@@ -821,20 +844,24 @@ dialog h2 {
     justify-content: center;
   }
 
-  .slot-core .stones {
-    display: none;
+  .slot-core .slot-type {
+    position: static;
+    min-width: 17px;
+    height: 17px;
+    font-size: 10px;
   }
 
   .slot-core .card {
-    align-items: center;
-    justify-content: center;
-    padding: 3px;
-    text-align: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 4px 5px 3px;
+    text-align: left;
   }
 
   .slot-core .card-name {
-    max-width: calc(100% - 8px);
-    font-size: 10px;
+    max-width: calc(100% - 24px);
+    font-size: 11px;
+    -webkit-line-clamp: 2;
   }
 
   .slot-core .type-mark {
@@ -846,12 +873,12 @@ dialog h2 {
   }
 
   .slot-core .card-value {
-    display: none;
+    display: block;
   }
 
   .slot-core .detail-button {
-    right: 2px;
-    bottom: 2px;
+    right: 3px;
+    bottom: 3px;
   }
 
   .slot.face-down .card {
@@ -879,25 +906,25 @@ dialog h2 {
     z-index: 40;
     background: rgba(18, 26, 22, 0.97);
     backdrop-filter: blur(14px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
   }
 
   .selected-info {
-    min-height: 32px;
-    padding: 6px 8px;
+    min-height: 28px;
+    padding: 5px 8px;
     font-size: 11px;
   }
 
   .button-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    padding: 6px;
+    gap: 5px;
+    padding: 5px;
   }
 
   .button-grid button {
-    min-height: 38px;
+    min-height: 34px;
     padding: 0 6px;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .log {
@@ -906,7 +933,7 @@ dialog h2 {
 
   .hand-panel {
     margin: 0 -6px;
-    padding: 6px;
+    padding: 5px 6px;
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
@@ -926,7 +953,7 @@ dialog h2 {
 
   .hand-card {
     flex-basis: 108px;
-    min-height: 68px;
+    min-height: 64px;
     padding: 6px;
   }
 

@@ -896,6 +896,7 @@ function renderBoard(id, side, owner) {
     node.innerHTML = `
       <div class="slot-header">
         <span>${LABEL[slot]}槽</span>
+        ${slotState ? `<span class="slot-type">${slotTypeMark(slotState)}</span>` : ""}
         <span class="stones">${renderStones(slotState?.stones || 0)}</span>
       </div>
       ${renderSlotCard(slotState, owner)}
@@ -924,10 +925,8 @@ function renderSlotCard(slotState, owner) {
   const hidden = owner === "enemy" && slotState.faceDown;
   if (hidden) {
     const hiddenMode = slotState.mode === "attack" ? "攻击" : slotState.mode === "ongoing" ? "永续" : "防守";
-    const hiddenMark = slotState.mode === "attack" ? "攻" : slotState.mode === "ongoing" ? "续" : "防";
     return `
       <div class="card">
-        <div class="type-mark">${hiddenMark}</div>
         <div class="card-name">里侧${hiddenMode}</div>
         <div class="card-meta"><span class="tag">${LABEL[slotState.card.element]}</span><span class="tag">${hiddenMode}</span></div>
         <div class="card-text">效果隐藏</div>
@@ -936,7 +935,6 @@ function renderSlotCard(slotState, owner) {
   }
   return `
     <div class="card">
-      <div class="type-mark">${TYPE_MARK[slotState.card.type] || "术"}</div>
       <div class="card-name">${slotState.card.name}</div>
       <div class="card-meta">
         <span class="tag">${LABEL[slotState.card.element]}</span>
@@ -949,6 +947,15 @@ function renderSlotCard(slotState, owner) {
       </div>
     </div>
   `;
+}
+
+function slotTypeMark(slotState) {
+  if (slotState.faceDown) {
+    if (slotState.mode === "attack") return "攻";
+    if (slotState.mode === "ongoing") return "续";
+    return "防";
+  }
+  return TYPE_MARK[slotState.card.type] || "术";
 }
 
 function modeLabel(slotState) {
@@ -1003,7 +1010,7 @@ function initMusic() {
   const audio = document.querySelector("#bgm");
   const button = document.querySelector("#musicToggle");
   if (!audio || !button) return;
-  audio.volume = 0.42;
+  audio.volume = 0.26;
   const update = (enabled) => {
     button.textContent = enabled ? "乐 On" : "乐 Off";
     button.setAttribute("aria-pressed", String(enabled));
