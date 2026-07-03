@@ -626,7 +626,7 @@ dialog h2 {
   body {
     min-height: 100svh;
     overflow-x: hidden;
-    padding-bottom: calc(64px + var(--safe-bottom));
+    padding-bottom: calc(142px + var(--safe-bottom));
     background:
       radial-gradient(circle at 50% 8%, rgba(247, 243, 232, 0.1), transparent 20rem),
       linear-gradient(180deg, #101413, #151d1a 46%, #101419);
@@ -679,6 +679,7 @@ dialog h2 {
   }
 
   .battlefield {
+    min-height: calc(100svh - 188px - var(--safe-top) - var(--safe-bottom));
     gap: 5px;
   }
 
@@ -717,9 +718,9 @@ dialog h2 {
     aspect-ratio: auto;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(3, 48px);
-    gap: 5px;
-    padding: 7px;
+    grid-template-rows: repeat(3, 54px);
+    gap: 6px;
+    padding: 8px;
     border: 1px solid rgba(47, 53, 45, 0.14);
     border-radius: 14px;
     background:
@@ -742,13 +743,14 @@ dialog h2 {
     right: auto;
     bottom: auto;
     width: 100%;
-    height: 48px;
-    min-height: 48px;
-    border: 1.5px solid color-mix(in srgb, var(--slot-color) 78%, #1b241f);
-    border-radius: 7px;
+    height: 54px;
+    min-height: 54px;
+    border: 1.5px solid color-mix(in srgb, var(--slot-color) 68%, #1b241f);
+    border-radius: 14px;
     background:
-      linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(238, 232, 214, 0.98));
-    box-shadow: 0 4px 9px rgba(24, 32, 29, 0.15);
+      radial-gradient(circle at 14px 14px, color-mix(in srgb, var(--slot-color) 16%, transparent), transparent 24px),
+      linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(240, 234, 216, 0.98));
+    box-shadow: 0 3px 8px rgba(24, 32, 29, 0.14);
     transform: none;
     overflow: hidden;
   }
@@ -766,10 +768,10 @@ dialog h2 {
     grid-column: 2;
     grid-row: 2;
     width: 100%;
-    height: 48px;
-    min-height: 48px;
-    border-radius: 7px;
-    box-shadow: 0 0 0 2px rgba(255, 253, 247, 0.62), 0 4px 9px rgba(24, 32, 29, 0.16);
+    height: 54px;
+    min-height: 54px;
+    border-radius: 14px;
+    box-shadow: 0 0 0 2px rgba(255, 253, 247, 0.62), 0 3px 8px rgba(24, 32, 29, 0.14);
   }
 
   .slot.selected {
@@ -777,12 +779,26 @@ dialog h2 {
   }
 
   .slot-header {
-    height: 18px;
-    padding: 0 3px 0 5px;
+    position: absolute;
+    inset: 4px 4px auto 4px;
+    z-index: 2;
+    height: 17px;
+    padding: 0;
     font-size: 10px;
     line-height: 1;
+    background: transparent;
+    color: var(--slot-color);
+  }
+
+  .slot-header span:first-child {
+    flex: 0 1 auto;
+    max-width: calc(100% - 22px);
+    height: 17px;
+    padding: 2px 6px;
+    border-radius: 999px;
     background: var(--slot-color);
     color: #fffdf7;
+    line-height: 1.2;
   }
 
   .slot-type {
@@ -805,18 +821,18 @@ dialog h2 {
   }
 
   .card {
-    height: calc(100% - 18px);
+    height: 100%;
     gap: 0;
-    padding: 3px 25px 2px 5px;
-    justify-content: flex-start;
+    padding: 22px 26px 5px 8px;
+    justify-content: center;
     background: transparent;
   }
 
   .card-name {
     max-width: 100%;
     padding: 0;
-    font-size: 10px;
-    line-height: 1.08;
+    font-size: 11px;
+    line-height: 1.05;
     color: #2a2f2b;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -832,10 +848,10 @@ dialog h2 {
   }
 
   .detail-button {
-    right: 3px;
-    bottom: 3px;
-    width: 19px;
-    height: 19px;
+    right: 5px;
+    bottom: 5px;
+    width: 21px;
+    height: 21px;
     border-color: rgba(24, 32, 29, 0.12);
     background: rgba(255, 253, 247, 0.96);
     font-size: 9px;
@@ -847,7 +863,10 @@ dialog h2 {
   }
 
   .card-value {
-    margin-top: auto;
+    position: absolute;
+    left: 8px;
+    bottom: 5px;
+    margin-top: 0;
     padding-right: 0;
     font-size: 8px;
     line-height: 1;
@@ -862,7 +881,7 @@ dialog h2 {
   }
 
   .slot-core .card {
-    padding: 3px 25px 2px 5px;
+    padding: 22px 26px 5px 8px;
     text-align: left;
   }
 
@@ -877,8 +896,8 @@ dialog h2 {
   }
 
   .slot-core .detail-button {
-    right: 3px;
-    bottom: 3px;
+    right: 5px;
+    bottom: 5px;
   }
 
   .slot.face-down .card {
@@ -932,18 +951,21 @@ dialog h2 {
   }
 
   .hand-panel {
-    margin: 0 -6px;
-    padding: 4px 6px;
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
-    border-radius: 8px 8px 0 0;
-    background: rgba(255, 255, 255, 0.72);
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: calc(66px + var(--safe-bottom));
+    z-index: 39;
+    margin: 0;
+    padding: 5px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    background: rgba(247, 243, 232, 0.96);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
   }
 
   .hand-title {
-    margin-bottom: 4px;
-    font-size: 12px;
+    display: none;
   }
 
   .hand {
@@ -952,8 +974,8 @@ dialog h2 {
   }
 
   .hand-card {
-    flex-basis: 108px;
-    min-height: 56px;
+    flex-basis: 116px;
+    min-height: 58px;
     padding: 5px;
   }
 
