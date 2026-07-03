@@ -1,4 +1,4 @@
-const CACHE_NAME = "wuxing-card-game-v5";
+const CACHE_NAME = "array-duel-v6";
 const ASSETS = [
   "./",
   "./index.html",

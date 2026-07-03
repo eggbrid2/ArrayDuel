@@ -145,7 +145,7 @@ function countAttack(side) {
 }
 
 function placeTargets(side, card) {
-  const candidates = card.type === "eye" ? ["core"] : [card.element, "core"];
+  const candidates = card.type === "eye" ? ["core"] : ELEMENTS;
   return candidates.filter((slot) => {
     const oldSlot = side.board[slot];
     const attackCountAfterReplace = countAttack(side) - (oldSlot?.mode === "attack" ? 1 : 0);
@@ -509,7 +509,7 @@ async function placeSelectedHand() {
   }
   const targetSlot = targets.length === 1 ? targets[0] : await askTrigger({
     title: "选择放置位置",
-    text: `${card.name}可以放入对应五行槽，也可以放入中台。`,
+    text: `${card.name}可以放入任意阵位；中台只能表侧。`,
     options: targets.map((slot) => ({
       label: `${LABEL[slot]}槽${state.player.board[slot] ? `：替换${state.player.board[slot].card.name}` : "：空槽"}`,
       value: slot,

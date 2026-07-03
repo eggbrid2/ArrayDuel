@@ -1,6 +1,6 @@
 {
-  "name": "五行阵斗",
-  "short_name": "五行阵斗",
+  "name": "斗阵 Array Duel",
+  "short_name": "斗阵",
   "description": "五行灵力卡牌对战网页游戏",
   "start_url": "./index.html",
   "scope": "./",

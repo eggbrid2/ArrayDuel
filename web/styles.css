@@ -664,16 +664,16 @@ dialog h2 {
 
   .board {
     width: min(100%, 346px);
-    min-height: 238px;
+    min-height: 252px;
     max-height: none;
     aspect-ratio: 1.46 / 1;
     border: 1px solid rgba(47, 53, 45, 0.14);
     border-radius: 14px;
     background:
-      radial-gradient(circle at 50% 51%, rgba(255, 253, 247, 0.86) 0 17%, transparent 17.5%),
-      radial-gradient(circle at 50% 51%, transparent 0 33%, rgba(64, 65, 54, 0.1) 33.4% 34%, transparent 34.5%),
-      linear-gradient(90deg, transparent 49.7%, rgba(64, 65, 54, 0.12) 50%, transparent 50.3%),
-      linear-gradient(180deg, transparent 49.7%, rgba(64, 65, 54, 0.12) 50%, transparent 50.3%),
+      radial-gradient(circle at 50% 51%, rgba(255, 253, 247, 0.78) 0 14%, transparent 14.5%),
+      radial-gradient(circle at 50% 51%, transparent 0 32%, rgba(64, 65, 54, 0.07) 32.4% 33%, transparent 33.5%),
+      linear-gradient(90deg, transparent 49.8%, rgba(64, 65, 54, 0.08) 50%, transparent 50.2%),
+      linear-gradient(180deg, transparent 49.8%, rgba(64, 65, 54, 0.08) 50%, transparent 50.2%),
       linear-gradient(180deg, rgba(255, 253, 247, 0.3), rgba(255, 253, 247, 0.08));
     box-shadow: inset 0 0 0 4px rgba(255, 253, 247, 0.22);
   }
@@ -685,8 +685,8 @@ dialog h2 {
   }
 
   .slot {
-    width: 24.5%;
-    height: 29%;
+    width: 25%;
+    height: 27%;
     min-height: 62px;
     border-width: 1.5px;
     border-radius: 9px;
@@ -700,17 +700,17 @@ dialog h2 {
     display: none;
   }
 
-  .slot-wood { left: 21%; top: 33%; }
-  .slot-fire { left: 50%; top: 18%; }
-  .slot-earth { left: 79%; top: 33%; }
-  .slot-metal { left: 68%; top: 79%; }
-  .slot-water { left: 32%; top: 79%; }
+  .slot-wood { left: 20%; top: 32%; }
+  .slot-fire { left: 50%; top: 17%; }
+  .slot-earth { left: 80%; top: 32%; }
+  .slot-metal { left: 69%; top: 81%; }
+  .slot-water { left: 31%; top: 81%; }
   .slot-core {
     left: 50%;
     top: 53%;
-    width: 23%;
-    height: 25%;
-    min-height: 58px;
+    width: 20%;
+    height: 21%;
+    min-height: 52px;
     border-radius: 999px;
     box-shadow: 0 0 0 3px rgba(255, 253, 247, 0.58), 0 8px 14px rgba(24, 32, 29, 0.18);
   }
@@ -720,7 +720,7 @@ dialog h2 {
   }
 
   .slot-header {
-    height: 20px;
+    height: 18px;
     padding: 2px 5px;
     font-size: 10px;
     line-height: 1;
@@ -736,7 +736,7 @@ dialog h2 {
   }
 
   .card {
-    height: calc(100% - 20px);
+    height: calc(100% - 18px);
     gap: 2px;
     padding: 4px 5px;
     justify-content: flex-start;
@@ -744,21 +744,21 @@ dialog h2 {
   }
 
   .card-name {
-    max-width: calc(100% - 20px);
+    max-width: calc(100% - 22px);
     padding-right: 0;
     font-size: 11px;
-    line-height: 1.12;
+    line-height: 1.1;
     color: #2a2f2b;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     overflow: hidden;
+    word-break: keep-all;
     text-shadow: none;
   }
 
   .type-mark {
     right: 4px;
-    top: 24px;
+    top: 21px;
     width: 19px;
     height: 19px;
     font-size: 10px;
@@ -782,9 +782,46 @@ dialog h2 {
   .card-value {
     margin-top: auto;
     padding-right: 24px;
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1;
     color: rgba(42, 47, 43, 0.72);
+  }
+
+  .slot-core .slot-header {
+    justify-content: center;
+  }
+
+  .slot-core .stones {
+    display: none;
+  }
+
+  .slot-core .card {
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    text-align: center;
+  }
+
+  .slot-core .card-name {
+    max-width: calc(100% - 8px);
+    font-size: 10px;
+  }
+
+  .slot-core .type-mark {
+    right: 2px;
+    top: 18px;
+    width: 17px;
+    height: 17px;
+    font-size: 9px;
+  }
+
+  .slot-core .card-value {
+    display: none;
+  }
+
+  .slot-core .detail-button {
+    right: 2px;
+    bottom: 2px;
   }
 
   .slot.face-down .card {
