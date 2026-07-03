@@ -120,23 +120,43 @@
         </label>
         <label class="field-line">
           <span>API 地址</span>
-          <input id="aiBaseUrl" type="url" placeholder="https://你的网关/v1/chat/completions" />
+          <input id="aiBaseUrl" type="text" placeholder="./ai-proxy.php" />
         </label>
         <label class="field-line">
           <span>模型</span>
-          <input id="aiModel" type="text" placeholder="gpt-4o-mini / deepseek-chat" />
+          <input id="aiModel" type="text" placeholder="gpt-5.5" />
+        </label>
+        <label class="field-line">
+          <span>常用模型</span>
+          <select id="aiModelPreset">
+            <option value="">手动填写</option>
+            <option value="gpt-5.5">gpt-5.5</option>
+            <option value="gpt-4o-mini">gpt-4o-mini</option>
+            <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+            <option value="deepseek-chat">deepseek-chat</option>
+            <option value="qwen-plus">qwen-plus</option>
+            <option value="glm-4-flash">glm-4-flash</option>
+          </select>
         </label>
         <label class="field-line">
           <span>API Key</span>
           <input id="aiApiKey" type="password" autocomplete="off" placeholder="sk-..." />
         </label>
-        <p class="trigger-text">支持 OpenAI 兼容中转站网关。配置只保存在当前浏览器，不会上传到游戏服务器。</p>
+        <p class="trigger-text">默认使用服务器内置 AI 代理，无需填写 Key。改成自己的 OpenAI 兼容网关时，可填写 API 地址、模型和 Key。</p>
         <div class="target-list">
           <button id="saveAiSettings" type="submit">保存</button>
           <button value="close" class="secondary" type="button" id="closeAiSettings">关闭</button>
         </div>
       </form>
     </dialog>
+
+    <div id="aiThinking" class="thinking-overlay" aria-live="polite" hidden>
+      <div class="thinking-panel">
+        <span class="thinking-ring" aria-hidden="true"></span>
+        <strong>大模型思考中</strong>
+        <span id="aiThinkingText">对手正在推演阵法...</span>
+      </div>
+    </div>
 
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>

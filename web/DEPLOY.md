@@ -1,6 +1,6 @@
 # 五行阵斗部署说明
 
-这是一个纯静态网页游戏，不需要后端。
+基础玩法是静态网页。若启用内置大模型对手，需要服务器支持 PHP，并放置一个仅服务器可读的 AI 配置文件。
 
 ## 本地试玩
 
@@ -13,7 +13,24 @@ python3 -m http.server 5173
 
 ## 部署
 
-把 `web/` 目录作为静态站点根目录部署即可。
+把 `web/` 目录作为站点根目录部署即可。若要启用默认 AI 代理，还需要在服务器创建：
+
+```php
+<?php
+return [
+    'api_key' => '你的中转站 Key',
+    'base_url' => 'https://cloud.omnimind.com.cn/',
+    'model' => 'gpt-5.5',
+];
+```
+
+推荐保存到：
+
+```text
+/www/server/arrayduel-ai-config.php
+```
+
+不要把这个配置文件提交到 Git。
 
 常见平台：
 

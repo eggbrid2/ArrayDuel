@@ -14,6 +14,12 @@ const CONTROLS = {
 const OVERCOME = { wood: "earth", fire: "metal", earth: "water", metal: "wood", water: "fire" };
 const GENERATES = { wood: "fire", fire: "earth", earth: "metal", metal: "water", water: "wood" };
 const AI_CONFIG_KEY = "arrayDuelAiConfig";
+const DEFAULT_AI_CONFIG = {
+  enabled: true,
+  baseUrl: "./ai-proxy.php",
+  apiKey: "",
+  model: "gpt-5.5",
+};
 
 const cardPool = {
   wood: [
@@ -299,7 +305,8 @@ function triggerOngoing(side) {
 }
 
 function canTarget(card, sourceSlot, targetSlot) {
-  if (sourceSlot === "core" || sourceSlot === "hand") return targetSlot !== "core";
+  if (sourceSlot === "hand") return false;
+  if (sourceSlot === "core") return targetSlot !== "core";
   return CONTROLS[card.element]?.includes(targetSlot);
 }
 
@@ -331,11 +338,16 @@ async function activate(slot, targetSlot = null) {
 }
 
 function getSelectedSource() {
-  if (state.selectedHand != null) return { card: state.player.hand[state.selectedHand], slot: "hand", handIndex: state.selectedHand };
   if (!state.selected) return null;
   const slotState = state.player.board[state.selected];
   if (!slotState) return null;
   return { card: slotState.card, slot: state.selected, slotState };
+}
+
+function getSelectedHandCard() {
+  if (state.selectedHand == null) return null;
+  const card = state.player.hand[state.selectedHand];
+  return card ? { card, slot: "hand", handIndex: state.selectedHand } : null;
 }
 
 async function resolveCard(side, opponent, source, targetSlot) {
@@ -369,8 +381,10 @@ async function resolveCard(side, opponent, source, targetSlot) {
       opponent.board[targetSlot] = null;
       log(`${side.name}以${card.name}破坏阵眼${target.card.name}。`);
     } else if (target) {
-      await applyDamage(opponent, targetSlot, card.value * multiplier + (slotState?.stones || 0), card, side);
-      log(`${side.name}发动${card.name}破坏${target.card.name}。`);
+      opponent.board[targetSlot] = null;
+      log(`${side.name}发动${card.name}毁灭${opponent.name}${LABEL[targetSlot]}槽的${target.card.name}。`);
+    } else {
+      log(`${card.name}没有找到可毁灭目标。`);
     }
     consumeSource(side, source);
   } else if (card.type === "ongoing") {
@@ -748,7 +762,6 @@ function buildEnemyActivationActions(enemy, opponent) {
     const slotState = enemy.board[slot];
     if (slotState) sources.push({ card: slotState.card, slot, slotState });
   }
-  enemy.hand.forEach((card, handIndex) => sources.push({ card, slot: "hand", handIndex }));
 
   for (const source of sources) {
     if (source.card.type === "attack") {
@@ -840,7 +853,8 @@ async function executeEnemyActivation(action) {
 async function chooseEnemyActionByModel(decision, actions) {
   const config = getAiConfig();
   if (!config.enabled || aiState.failedThisTurn) return null;
-  if (!config.baseUrl || !config.apiKey || !config.model) return null;
+  if (!config.baseUrl || !config.model) return null;
+  showAiThinking(true, decision);
   try {
     const publicActions = actions.map((action) => ({
       id: action.id,
@@ -851,7 +865,7 @@ async function chooseEnemyActionByModel(decision, actions) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${config.apiKey}`,
+        ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
       },
       body: JSON.stringify({
         model: config.model,
@@ -875,6 +889,8 @@ async function chooseEnemyActionByModel(decision, actions) {
     aiState.failedThisTurn = true;
     log(`大模型对手暂不可用，改用本地AI。${error.message || ""}`);
     return null;
+  } finally {
+    await showAiThinking(false);
   }
 }
 
@@ -885,6 +901,7 @@ function parseAiChoice(content) {
 
 function normalizeChatEndpoint(baseUrl) {
   const trimmed = baseUrl.trim().replace(/\/+$/, "");
+  if (/^\.?\//.test(trimmed) || trimmed.endsWith(".php")) return trimmed;
   if (trimmed.endsWith("/chat/completions")) return trimmed;
   if (trimmed.endsWith("/v1")) return `${trimmed}/chat/completions`;
   return `${trimmed}/v1/chat/completions`;
@@ -892,15 +909,9 @@ function normalizeChatEndpoint(baseUrl) {
 
 function getAiConfig() {
   try {
-    return {
-      enabled: false,
-      baseUrl: "",
-      apiKey: "",
-      model: "",
-      ...JSON.parse(localStorage.getItem(AI_CONFIG_KEY) || "{}"),
-    };
+    return { ...DEFAULT_AI_CONFIG, ...JSON.parse(localStorage.getItem(AI_CONFIG_KEY) || "{}") };
   } catch {
-    return { enabled: false, baseUrl: "", apiKey: "", model: "" };
+    return { ...DEFAULT_AI_CONFIG };
   }
 }
 
@@ -915,10 +926,10 @@ function buildAiSystemPrompt() {
     "请只输出 JSON，例如：{\"actionId\":\"pass\",\"reason\":\"保留资源\"}。",
     "核心规则：五行槽为木、火、土、金、水，加中台。普通五行卡只能放到自身属性槽或中台；阵眼只能放中台，且不计入攻防位。",
     "场上最多 3 个攻击位、3 个防守位。替换同类型永远合法；替换不同类型或空槽不能打破三攻三防限制。",
-    "攻击卡攻击同属性或自身克制/相生可达目标；中台或手卡发动攻击可攻击任意五行槽，但不能攻击中台。",
+    "发动阶段只能发动场上卡槽，中台攻击可攻击任意五行槽但不能攻击中台；手卡不能直接发动，只能在主阶段放置或替换。",
     "攻击攻击槽时双方按灵力和五行倍率相减，溢出不反伤；攻击防守/永续时按灵力扣除，空槽直接伤害生命。",
     "五行相克：木克土，土克水，水克火，火克金，金克木。五行相生：木生火，火生土，土生金，金生水，水生木。",
-    "防守、恢复、反击、销毁为一次性；永续持续占槽；阵眼持续在中台生效直到被销毁或替换。",
+    "防守、恢复、反击、销毁为一次性；销毁可以选择任意有卡的阵位；永续持续占槽；阵眼持续在中台生效直到被销毁或替换。",
     "优先策略：能造成有效伤害就进攻；能破坏关键永续/阵眼就销毁；血量低时恢复；手卡多时优先上场或替换弱牌；不要选择 pass 除非其他动作价值低。",
   ].join("\n");
 }
@@ -980,6 +991,30 @@ function serializeCardForAi(card) {
     value: card.value,
     text: card.text,
   };
+}
+
+function showAiThinking(visible, decision = "") {
+  const overlay = document.querySelector("#aiThinking");
+  const text = document.querySelector("#aiThinkingText");
+  if (!overlay) return Promise.resolve();
+  if (visible) {
+    const label = {
+      imbue: "对手正在选择补灵目标...",
+      main1: "对手正在布局主1...",
+      activation: "对手正在推演发动目标...",
+      main2: "对手正在调整主2...",
+    }[decision] || "对手正在推演阵法...";
+    if (text) text.textContent = label;
+    overlay.hidden = false;
+    requestAnimationFrame(() => overlay.classList.add("show"));
+    return Promise.resolve();
+  } else {
+    overlay.classList.remove("show");
+    return new Promise((resolve) => setTimeout(() => {
+      if (!overlay.classList.contains("show")) overlay.hidden = true;
+      resolve();
+    }, 180));
+  }
 }
 
 function placeEnemyHandCard() {
@@ -1104,7 +1139,7 @@ function openTargetDialog() {
   for (const targetSlot of ELEMENTS) {
     if (targetSlot === "core" && source.card.type === "attack") continue;
     const target = state.enemy.board[targetSlot];
-    const legal = source.card.type === "destroy" ? Boolean(target) : canTarget(source.card, source.slot, targetSlot);
+      const legal = source.card.type === "destroy" ? Boolean(target) : canTarget(source.card, source.slot, targetSlot);
     if (!legal) continue;
     const button = document.createElement("button");
     button.type = "button";
@@ -1236,15 +1271,18 @@ function render() {
   document.querySelector("#turnLabel").textContent = state.active === "player" ? `玩家回合 · ${phaseLabel(state.phase)}` : "对手回合";
   document.querySelector("#roundLabel").textContent = `第 ${state.round} 回合`;
   const source = getSelectedSource();
+  const handSource = getSelectedHandCard();
   document.querySelector("#selectedInfo").textContent = source
     ? `${source.slot === "hand" ? "手卡" : LABEL[source.slot] + "槽"} ${source.card.name}：${TYPE[source.card.type]}`
+    : handSource
+      ? `手卡 ${handSource.card.name}：${TYPE[handSource.card.type]}`
     : state.winner
       ? `${state.winner}获胜`
       : "选择己方卡槽或手卡";
   const canUse = state.active === "player" && !state.winner;
   const inMain = ["main1", "main2"].includes(state.phase);
   document.querySelector("#imbueBtn").disabled = !canUse || !inMain || !state.selected || state.hasImbued || state.selectedHand != null;
-  document.querySelector("#activateBtn").disabled = !canUse || state.phase !== "activation" || !source || state.hasActed;
+  document.querySelector("#activateBtn").disabled = !canUse || state.phase !== "activation" || !source || state.hasActed || state.selectedHand != null;
   document.querySelector("#replaceBtn").disabled = !canUse || !inMain || state.selectedHand == null;
   document.querySelector("#endBtn").disabled = !canUse;
   document.querySelector("#endBtn").textContent = state.phase === "end" ? "结束回合" : "下一阶段";
@@ -1399,6 +1437,7 @@ function initAiSettings() {
     enabled: document.querySelector("#aiEnabled"),
     baseUrl: document.querySelector("#aiBaseUrl"),
     model: document.querySelector("#aiModel"),
+    modelPreset: document.querySelector("#aiModelPreset"),
     apiKey: document.querySelector("#aiApiKey"),
   };
 
@@ -1413,8 +1452,13 @@ function initAiSettings() {
     fields.enabled.checked = Boolean(config.enabled);
     fields.baseUrl.value = config.baseUrl || "";
     fields.model.value = config.model || "";
+    fields.modelPreset.value = [...fields.modelPreset.options].some((option) => option.value === config.model) ? config.model : "";
     fields.apiKey.value = config.apiKey || "";
     dialog.showModal();
+  });
+
+  fields.modelPreset?.addEventListener("change", () => {
+    if (fields.modelPreset.value) fields.model.value = fields.modelPreset.value;
   });
 
   form.addEventListener("submit", (event) => {

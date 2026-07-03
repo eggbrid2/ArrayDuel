@@ -684,7 +684,8 @@ dialog h2 {
 
 .field-line input[type="url"],
 .field-line input[type="text"],
-.field-line input[type="password"] {
+.field-line input[type="password"],
+.field-line select {
   width: 100%;
   min-height: 42px;
   border: 1px solid rgba(24, 32, 29, 0.18);
@@ -764,6 +765,64 @@ dialog h2 {
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+.thinking-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(8, 12, 11, 0.46);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.thinking-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.thinking-panel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: min(300px, 86vw);
+  padding: 18px 16px;
+  border: 1px solid rgba(229, 197, 116, 0.42);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(229, 197, 116, 0.18), transparent 8rem),
+    rgba(20, 29, 24, 0.96);
+  color: #fffdf7;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.38);
+}
+
+.thinking-panel strong {
+  font-size: 17px;
+}
+
+.thinking-panel span:last-child {
+  color: rgba(255, 253, 247, 0.72);
+  font-size: 13px;
+}
+
+.thinking-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(229, 197, 116, 0.22);
+  border-top-color: #e5c574;
+  border-right-color: #7bbf8c;
+  animation: thinkingSpin 900ms linear infinite;
+}
+
+@keyframes thinkingSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1080px) {
