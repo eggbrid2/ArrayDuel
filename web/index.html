@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101413" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="五行阵斗" />
+    <title>五行阵斗</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar">
+        <div>
+          <h1>五行阵斗</h1>
+          <p>六槽阵法 · 中台阵眼 · 灵力流转</p>
+        </div>
+        <div class="round-panel">
+          <span id="turnLabel">玩家回合</span>
+          <strong id="roundLabel">第 1 回合</strong>
+        </div>
+      </section>
+
+      <section class="battlefield" aria-label="五行阵斗战场">
+        <div class="player-area enemy-area">
+          <div class="status-line">
+            <div>
+              <span class="label">对手</span>
+              <strong id="enemyHp">24</strong>
+              <span>生命</span>
+            </div>
+            <div>
+              <span class="label">灵石</span>
+              <strong id="enemyStones">0</strong>
+            </div>
+          </div>
+          <div id="enemyBoard" class="board board-enemy"></div>
+        </div>
+
+        <div class="center-column">
+          <div class="wuxing-ring" aria-hidden="true">
+            <span class="node wood">木</span>
+            <span class="node fire">火</span>
+            <span class="node earth">土</span>
+            <span class="node metal">金</span>
+            <span class="node water">水</span>
+            <span class="core">中</span>
+          </div>
+          <div class="action-panel">
+            <div id="selectedInfo" class="selected-info">选择己方卡槽</div>
+            <div class="button-grid">
+              <button id="imbueBtn" type="button">补灵</button>
+              <button id="activateBtn" type="button">发动</button>
+              <button id="replaceBtn" type="button">放置</button>
+              <button id="endBtn" type="button">结束</button>
+            </div>
+          </div>
+          <ol id="log" class="log" aria-label="战斗日志"></ol>
+        </div>
+
+        <div class="player-area">
+          <div id="playerBoard" class="board"></div>
+          <div class="hand-panel">
+            <div class="hand-title">手卡</div>
+            <div id="playerHand" class="hand"></div>
+          </div>
+          <div class="status-line">
+            <div>
+              <span class="label">玩家</span>
+              <strong id="playerHp">24</strong>
+              <span>生命</span>
+            </div>
+            <div>
+              <span class="label">灵石</span>
+              <strong id="playerStones">0</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="targetDialog">
+      <form method="dialog">
+        <h2>选择目标</h2>
+        <div id="targetList" class="target-list"></div>
+        <button value="cancel" class="secondary">取消</button>
+      </form>
+    </dialog>
+
+    <dialog id="triggerDialog">
+      <form method="dialog">
+        <h2 id="triggerTitle">触发询问</h2>
+        <p id="triggerText" class="trigger-text"></p>
+        <div id="triggerList" class="target-list"></div>
+      </form>
+    </dialog>
+
+    <dialog id="cardDialog">
+      <form method="dialog">
+        <h2 id="cardTitle">卡牌详情</h2>
+        <p id="cardMeta" class="trigger-text"></p>
+        <p id="cardText" class="trigger-text"></p>
+        <button value="close" class="secondary">关闭</button>
+      </form>
+    </dialog>
+
+    <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
+
+    <script src="./app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

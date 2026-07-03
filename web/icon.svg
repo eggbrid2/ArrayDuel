@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#101413"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="#f7f3e8" stroke-width="18" opacity=".86"/>
+  <circle cx="256" cy="256" r="72" fill="#5a4a84" stroke="#f7f3e8" stroke-width="10"/>
+  <circle cx="256" cy="76" r="46" fill="#3f8a57"/>
+  <circle cx="427" cy="200" r="46" fill="#c94c31"/>
+  <circle cx="362" cy="402" r="46" fill="#9a7a3f"/>
+  <circle cx="150" cy="402" r="46" fill="#7d8790"/>
+  <circle cx="85" cy="200" r="46" fill="#327aa1"/>
+  <text x="256" y="282" text-anchor="middle" font-family="system-ui, sans-serif" font-size="70" font-weight="800" fill="#f7f3e8">中</text>
+</svg>

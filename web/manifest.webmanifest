@@ -1,0 +1,19 @@
+{
+  "name": "五行阵斗",
+  "short_name": "五行阵斗",
+  "description": "五行灵力卡牌对战网页游戏",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101413",
+  "theme_color": "#101413",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
