@@ -19,6 +19,7 @@
           <p>Array Duel · 六槽阵法 · 灵力流转</p>
         </div>
         <div class="topbar-right">
+          <button id="aiSettingsBtn" class="music-toggle" type="button">AI设置</button>
           <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">乐 Off</button>
           <div class="round-panel">
             <span id="turnLabel">玩家回合</span>
@@ -107,6 +108,33 @@
         <p id="cardMeta" class="trigger-text"></p>
         <p id="cardText" class="trigger-text"></p>
         <button value="close" class="secondary">关闭</button>
+      </form>
+    </dialog>
+
+    <dialog id="aiDialog">
+      <form id="aiForm" method="dialog">
+        <h2>大模型对战设置</h2>
+        <label class="field-line">
+          <span>启用大模型对手</span>
+          <input id="aiEnabled" type="checkbox" />
+        </label>
+        <label class="field-line">
+          <span>API 地址</span>
+          <input id="aiBaseUrl" type="url" placeholder="https://你的网关/v1/chat/completions" />
+        </label>
+        <label class="field-line">
+          <span>模型</span>
+          <input id="aiModel" type="text" placeholder="gpt-4o-mini / deepseek-chat" />
+        </label>
+        <label class="field-line">
+          <span>API Key</span>
+          <input id="aiApiKey" type="password" autocomplete="off" placeholder="sk-..." />
+        </label>
+        <p class="trigger-text">支持 OpenAI 兼容中转站网关。配置只保存在当前浏览器，不会上传到游戏服务器。</p>
+        <div class="target-list">
+          <button id="saveAiSettings" type="submit">保存</button>
+          <button value="close" class="secondary" type="button" id="closeAiSettings">关闭</button>
+        </div>
       </form>
     </dialog>
 

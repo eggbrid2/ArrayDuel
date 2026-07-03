@@ -13,6 +13,7 @@ const CONTROLS = {
 };
 const OVERCOME = { wood: "earth", fire: "metal", earth: "water", metal: "wood", water: "fire" };
 const GENERATES = { wood: "fire", fire: "earth", earth: "metal", metal: "water", water: "wood" };
+const AI_CONFIG_KEY = "arrayDuelAiConfig";
 
 const cardPool = {
   wood: [
@@ -87,6 +88,10 @@ const logState = {
   queue: [],
   busy: false,
   waiters: [],
+};
+
+const aiState = {
+  failedThisTurn: false,
 };
 
 function createSide(name) {
@@ -662,38 +667,31 @@ async function nextPhase() {
 async function runEnemyTurn() {
   if (state.winner) return;
   const enemy = state.enemy;
+  aiState.failedThisTurn = false;
   log("对手进入准备阶段。");
   await waitForLogIdle();
-  const imbueTarget = ELEMENTS.find((slot) => enemy.board[slot] && enemy.board[slot].mode !== "eye" && enemy.board[slot].stones < 2);
-  if (enemy.stones > 0 && imbueTarget) {
-    enemy.board[imbueTarget].stones += 1;
+  const imbueAction = await chooseEnemyAction("imbue", buildEnemyImbueActions(enemy));
+  if (imbueAction?.kind === "imbue") {
+    enemy.board[imbueAction.slot].stones += 1;
     enemy.stones -= 1;
-    log(`对手为${LABEL[imbueTarget]}槽补充 1 点灵力。`);
+    log(`对手为${LABEL[imbueAction.slot]}槽补充 1 点灵力。`);
     await waitForLogIdle();
   }
 
   log("对手进入主1。");
   await waitForLogIdle();
-  let move = findBestMove(enemy, state.player);
-  if (!move) {
-    placeEnemyHandCard();
-    await waitForLogIdle();
-    move = findBestMove(enemy, state.player);
-  }
+  await executeEnemyPlacement(await chooseEnemyAction("main1", buildEnemyPlacementActions(enemy)), "主1");
+  await waitForLogIdle();
 
   log("对手进入发动阶段。");
   await waitForLogIdle();
-  if (move) await resolveCard(enemy, state.player, move.source, move.target);
-  else {
-    const heal = findSource(enemy, "heal");
-    if (heal) await resolveCard(enemy, state.player, heal, null);
-    else log("对手按兵不动。");
-  }
+  const activationAction = await chooseEnemyAction("activation", buildEnemyActivationActions(enemy, state.player));
+  await executeEnemyActivation(activationAction);
   await waitForLogIdle();
 
   log("对手进入主2。");
   await waitForLogIdle();
-  placeEnemyHandCard();
+  await executeEnemyPlacement(await chooseEnemyAction("main2", buildEnemyPlacementActions(enemy)), "主2");
   await waitForLogIdle();
   checkWinner();
   render();
@@ -702,6 +700,286 @@ async function runEnemyTurn() {
   setTimeout(() => {
     endTurn();
   }, 800);
+}
+
+function buildEnemyImbueActions(enemy) {
+  const actions = [{ id: "pass", kind: "pass", label: "不补灵" }];
+  if (enemy.stones <= 0) return actions;
+  for (const slot of ELEMENTS) {
+    const slotState = enemy.board[slot];
+    if (!slotState || slotState.mode === "eye" || slotState.stones >= 2) continue;
+    actions.push({
+      id: `imbue:${slot}`,
+      kind: "imbue",
+      slot,
+      label: `为${LABEL[slot]}槽${slotState.card.name}补充 1 点灵力`,
+    });
+  }
+  return actions;
+}
+
+function buildEnemyPlacementActions(enemy) {
+  const actions = [{ id: "pass", kind: "pass", label: "不放置手卡" }];
+  enemy.hand.forEach((card, handIndex) => {
+    const choices = placeChoices(enemy, card).filter((choice) => !choice.disabled);
+    for (const choice of choices) {
+      const slot = choice.value;
+      const oldSlot = enemy.board[slot];
+      const faceOptions = slot === "core" || card.type === "eye" ? [false] : [false, true];
+      for (const faceDown of faceOptions) {
+        actions.push({
+          id: `place:${handIndex}:${slot}:${faceDown ? "down" : "up"}`,
+          kind: "place",
+          handIndex,
+          slot,
+          faceDown,
+          label: `将手卡${handIndex + 1} ${card.name}${faceDown ? "里侧" : "表侧"}放入${LABEL[slot]}槽${oldSlot ? `，替换${oldSlot.card.name}` : ""}`,
+        });
+      }
+    }
+  });
+  return actions;
+}
+
+function buildEnemyActivationActions(enemy, opponent) {
+  const actions = [{ id: "pass", kind: "pass", label: "不发动效果" }];
+  const sources = [];
+  for (const slot of ELEMENTS) {
+    const slotState = enemy.board[slot];
+    if (slotState) sources.push({ card: slotState.card, slot, slotState });
+  }
+  enemy.hand.forEach((card, handIndex) => sources.push({ card, slot: "hand", handIndex }));
+
+  for (const source of sources) {
+    if (source.card.type === "attack") {
+      for (const target of ELEMENTS) {
+        if (target === "core") continue;
+        if (!canTarget(source.card, source.slot, target)) continue;
+        actions.push({
+          id: source.handIndex == null ? `act:${source.slot}:${target}` : `act:hand:${source.handIndex}:${target}`,
+          kind: "activate",
+          source,
+          target,
+          label: `${sourceLabel(source)}发动${source.card.name}攻击玩家${LABEL[target]}槽`,
+        });
+      }
+    } else if (source.card.type === "destroy") {
+      for (const target of ELEMENTS) {
+        if (!opponent.board[target]) continue;
+        actions.push({
+          id: source.handIndex == null ? `act:${source.slot}:${target}` : `act:hand:${source.handIndex}:${target}`,
+          kind: "activate",
+          source,
+          target,
+          label: `${sourceLabel(source)}发动${source.card.name}破坏玩家${LABEL[target]}槽`,
+        });
+      }
+    } else if (["heal", "counter", "defense", "ongoing", "eye"].includes(source.card.type)) {
+      actions.push({
+        id: source.handIndex == null ? `act:${source.slot}` : `act:hand:${source.handIndex}`,
+        kind: "activate",
+        source,
+        target: null,
+        label: `${sourceLabel(source)}发动${source.card.name}`,
+      });
+    }
+  }
+  return actions;
+}
+
+function sourceLabel(source) {
+  return source.handIndex == null ? `${LABEL[source.slot]}槽` : `手卡${source.handIndex + 1}`;
+}
+
+async function chooseEnemyAction(decision, actions) {
+  if (actions.length <= 1) return actions[0];
+  const llmAction = await chooseEnemyActionByModel(decision, actions);
+  if (llmAction) return llmAction;
+  return chooseEnemyActionLocal(decision, actions);
+}
+
+function chooseEnemyActionLocal(decision, actions) {
+  if (decision === "imbue") return actions.find((action) => action.kind === "imbue") || actions[0];
+  if (decision === "activation") {
+    return actions.find((action) => action.kind === "activate" && action.source.card.type === "attack")
+      || actions.find((action) => action.kind === "activate" && action.source.card.type === "destroy")
+      || actions.find((action) => action.kind === "activate" && action.source.card.type === "heal")
+      || actions[0];
+  }
+  return actions.find((action) => action.kind === "place" && action.handIndex === enemyPlayableHandIndex(state.enemy))
+    || actions.find((action) => action.kind === "place")
+    || actions[0];
+}
+
+async function executeEnemyPlacement(action, phaseName) {
+  if (!action || action.kind !== "place") {
+    log(`对手${phaseName}没有放置手卡。`);
+    return false;
+  }
+  const card = state.enemy.hand[action.handIndex];
+  if (!card || !canPlaceIntoLane(state.enemy, card, action.slot)) {
+    log(`对手${phaseName}放置失败，改为观望。`);
+    return false;
+  }
+  const oldSlot = state.enemy.board[action.slot];
+  state.enemy.board[action.slot] = createSlot(card, action.slot, "enemy", action.faceDown);
+  state.enemy.hand.splice(action.handIndex, 1);
+  log(oldSlot ? `对手将一张手卡替换${LABEL[action.slot]}槽。` : `对手将一张手卡放入${LABEL[action.slot]}槽。`);
+  render();
+  return true;
+}
+
+async function executeEnemyActivation(action) {
+  if (!action || action.kind !== "activate") {
+    log("对手按兵不动。");
+    return;
+  }
+  await resolveCard(state.enemy, state.player, action.source, action.target);
+}
+
+async function chooseEnemyActionByModel(decision, actions) {
+  const config = getAiConfig();
+  if (!config.enabled || aiState.failedThisTurn) return null;
+  if (!config.baseUrl || !config.apiKey || !config.model) return null;
+  try {
+    const publicActions = actions.map((action) => ({
+      id: action.id,
+      label: action.label,
+      kind: action.kind,
+    }));
+    const response = await fetch(normalizeChatEndpoint(config.baseUrl), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: config.model,
+        temperature: 0.25,
+        max_tokens: 160,
+        messages: [
+          { role: "system", content: buildAiSystemPrompt() },
+          { role: "user", content: buildAiDecisionPrompt(decision, publicActions) },
+        ],
+      }),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || data.output_text || "";
+    const parsed = parseAiChoice(content);
+    const selected = actions.find((action) => action.id === parsed.actionId);
+    if (!selected) throw new Error("模型没有选择合法动作");
+    if (parsed.reason) log(`对手思索：${parsed.reason.slice(0, 42)}`);
+    return selected;
+  } catch (error) {
+    aiState.failedThisTurn = true;
+    log(`大模型对手暂不可用，改用本地AI。${error.message || ""}`);
+    return null;
+  }
+}
+
+function parseAiChoice(content) {
+  const jsonText = content.match(/\{[\s\S]*\}/)?.[0] || content;
+  return JSON.parse(jsonText);
+}
+
+function normalizeChatEndpoint(baseUrl) {
+  const trimmed = baseUrl.trim().replace(/\/+$/, "");
+  if (trimmed.endsWith("/chat/completions")) return trimmed;
+  if (trimmed.endsWith("/v1")) return `${trimmed}/chat/completions`;
+  return `${trimmed}/v1/chat/completions`;
+}
+
+function getAiConfig() {
+  try {
+    return {
+      enabled: false,
+      baseUrl: "",
+      apiKey: "",
+      model: "",
+      ...JSON.parse(localStorage.getItem(AI_CONFIG_KEY) || "{}"),
+    };
+  } catch {
+    return { enabled: false, baseUrl: "", apiKey: "", model: "" };
+  }
+}
+
+function saveAiConfig(config) {
+  localStorage.setItem(AI_CONFIG_KEY, JSON.stringify(config));
+}
+
+function buildAiSystemPrompt() {
+  return [
+    "你是网页卡牌游戏《斗阵 Array Duel》的对手AI，修仙阵法风格，目标是击败玩家。",
+    "你只能从用户给出的 actions 数组里选择一个 actionId，不能发明动作。",
+    "请只输出 JSON，例如：{\"actionId\":\"pass\",\"reason\":\"保留资源\"}。",
+    "核心规则：五行槽为木、火、土、金、水，加中台。普通五行卡只能放到自身属性槽或中台；阵眼只能放中台，且不计入攻防位。",
+    "场上最多 3 个攻击位、3 个防守位。替换同类型永远合法；替换不同类型或空槽不能打破三攻三防限制。",
+    "攻击卡攻击同属性或自身克制/相生可达目标；中台或手卡发动攻击可攻击任意五行槽，但不能攻击中台。",
+    "攻击攻击槽时双方按灵力和五行倍率相减，溢出不反伤；攻击防守/永续时按灵力扣除，空槽直接伤害生命。",
+    "五行相克：木克土，土克水，水克火，火克金，金克木。五行相生：木生火，火生土，土生金，金生水，水生木。",
+    "防守、恢复、反击、销毁为一次性；永续持续占槽；阵眼持续在中台生效直到被销毁或替换。",
+    "优先策略：能造成有效伤害就进攻；能破坏关键永续/阵眼就销毁；血量低时恢复；手卡多时优先上场或替换弱牌；不要选择 pass 除非其他动作价值低。",
+  ].join("\n");
+}
+
+function buildAiDecisionPrompt(decision, actions) {
+  return JSON.stringify({
+    decision,
+    round: state.round,
+    phase: phaseLabel(state.phase),
+    enemy: serializeSideForAi(state.enemy, "enemy"),
+    player: serializeSideForAi(state.player, "player"),
+    cardPool,
+    eyePool,
+    actions,
+  });
+}
+
+function serializeSideForAi(side, owner) {
+  return {
+    name: side.name,
+    hp: side.hp,
+    stones: side.stones,
+    attackCount: countAttack(side),
+    defenseCount: countDefense(side),
+    hand: owner === "enemy" ? side.hand.map(serializeCardForAi) : `${side.hand.length}张`,
+    board: Object.fromEntries(ELEMENTS.map((slot) => [slot, serializeSlotForAi(side.board[slot], owner, slot)])),
+  };
+}
+
+function serializeSlotForAi(slotState, owner, slot) {
+  if (!slotState) return null;
+  const hidden = owner === "player" && slotState.faceDown;
+  if (hidden) {
+    return {
+      slot,
+      element: LABEL[slot],
+      hidden: true,
+      mode: modeLabel(slotState),
+      spirit: slotState.hp + slotState.stones,
+    };
+  }
+  return {
+    slot,
+    element: LABEL[slot],
+    hidden: false,
+    mode: modeLabel(slotState),
+    stones: slotState.stones,
+    hp: slotState.hp,
+    spirit: slotState.hp + slotState.stones,
+    card: serializeCardForAi(slotState.card),
+  };
+}
+
+function serializeCardForAi(card) {
+  return {
+    name: card.name,
+    element: LABEL[card.element],
+    type: TYPE[card.type],
+    value: card.value,
+    text: card.text,
+  };
 }
 
 function placeEnemyHandCard() {
@@ -1110,6 +1388,52 @@ document.querySelector("#activateBtn").addEventListener("click", () => activate(
 document.querySelector("#replaceBtn").addEventListener("click", () => placeSelectedHand());
 document.querySelector("#endBtn").addEventListener("click", () => nextPhase());
 
+function initAiSettings() {
+  const openButton = document.querySelector("#aiSettingsBtn");
+  const dialog = document.querySelector("#aiDialog");
+  const form = document.querySelector("#aiForm");
+  const closeButton = document.querySelector("#closeAiSettings");
+  if (!openButton || !dialog || !form) return;
+
+  const fields = {
+    enabled: document.querySelector("#aiEnabled"),
+    baseUrl: document.querySelector("#aiBaseUrl"),
+    model: document.querySelector("#aiModel"),
+    apiKey: document.querySelector("#aiApiKey"),
+  };
+
+  const updateButton = () => {
+    const config = getAiConfig();
+    openButton.textContent = config.enabled ? "AI On" : "AI设置";
+    openButton.setAttribute("aria-pressed", String(config.enabled));
+  };
+
+  openButton.addEventListener("click", () => {
+    const config = getAiConfig();
+    fields.enabled.checked = Boolean(config.enabled);
+    fields.baseUrl.value = config.baseUrl || "";
+    fields.model.value = config.model || "";
+    fields.apiKey.value = config.apiKey || "";
+    dialog.showModal();
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveAiConfig({
+      enabled: fields.enabled.checked,
+      baseUrl: fields.baseUrl.value.trim(),
+      model: fields.model.value.trim(),
+      apiKey: fields.apiKey.value.trim(),
+    });
+    updateButton();
+    dialog.close();
+    log(fields.enabled.checked ? "大模型对手已启用。" : "大模型对手已关闭。");
+  });
+
+  closeButton?.addEventListener("click", () => dialog.close());
+  updateButton();
+}
+
 function initMusic() {
   const audio = document.querySelector("#bgm");
   const button = document.querySelector("#musicToggle");
@@ -1146,5 +1470,6 @@ function initMusic() {
   });
 }
 
+initAiSettings();
 initMusic();
 setup();
