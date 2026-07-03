@@ -144,23 +144,117 @@ function countAttack(side) {
   return Object.values(side.board).filter((slot) => slot?.mode === "attack").length;
 }
 
+function countDefense(side) {
+  return Object.values(side.board).filter((slot) => slot?.mode === "defense" || slot?.mode === "ongoing").length;
+}
+
+function placementLane(card) {
+  if (card.type === "eye") return "eye";
+  return card.type === "attack" ? "attack" : "defense";
+}
+
+function laneLimitMessage(card) {
+  const lane = placementLane(card);
+  if (lane === "attack") return `攻击位已有 3 张，无法放置${card.name}。`;
+  if (lane === "defense") return `防守位已有 3 张，无法放置${card.name}。`;
+  return `无法放置${card.name}。`;
+}
+
+function laneLabel(lane) {
+  if (lane === "attack") return "攻击";
+  if (lane === "defense") return "防守";
+  if (lane === "eye") return "阵眼";
+  return "卡";
+}
+
+function slotLane(slotState) {
+  if (!slotState) return null;
+  if (slotState.mode === "attack") return "attack";
+  if (slotState.mode === "defense" || slotState.mode === "ongoing") return "defense";
+  return slotState.mode;
+}
+
 function placeTargets(side, card) {
-  const candidates = card.type === "eye" ? ["core"] : ELEMENTS;
-  return candidates.filter((slot) => {
+  const lane = placementLane(card);
+  if (lane === "eye") return ["core"];
+  const candidates = new Set([card.element, "core"]);
+  const laneIsFull = lane === "attack" ? countAttack(side) >= 3 : countDefense(side) >= 3;
+  if (laneIsFull) {
+    candidates.add(card.element);
+    candidates.add("core");
+  }
+  return [...candidates].filter((slot) => {
     const oldSlot = side.board[slot];
-    const attackCountAfterReplace = countAttack(side) - (oldSlot?.mode === "attack" ? 1 : 0);
-    return card.type !== "attack" || attackCountAfterReplace < 3;
+    if (slotLane(oldSlot) === lane) return true;
+    if (lane === "attack") {
+      const attackCountAfterReplace = countAttack(side) - (oldSlot?.mode === "attack" ? 1 : 0);
+      return attackCountAfterReplace < 3;
+    }
+    const replacesDefense = oldSlot?.mode === "defense" || oldSlot?.mode === "ongoing";
+    const defenseCountAfterReplace = countDefense(side) - (replacesDefense ? 1 : 0);
+    return defenseCountAfterReplace < 3;
   });
 }
 
-function drawIntoSlot(side, sideKey, slot) {
-  const card = slot === "core" && Math.random() < 0.25 ? drawEye() : drawCard(slot === "core" ? randomFive() : slot);
-  if (card.type === "attack" && countAttack(side) >= 3) {
-    side.hand.push(card);
-    side.board[slot] = null;
-    log(`${side.name}抽到${card.name}，攻击位已满，加入手卡。`);
-    return;
+function canPlaceIntoLane(side, card, slot) {
+  const oldSlot = side.board[slot];
+  const lane = placementLane(card);
+  if (lane === "eye") return true;
+  if (slotLane(oldSlot) === lane) return true;
+  if (lane === "attack") return countAttack(side) - (oldSlot?.mode === "attack" ? 1 : 0) < 3;
+  const replacesDefense = oldSlot?.mode === "defense" || oldSlot?.mode === "ongoing";
+  return countDefense(side) - (replacesDefense ? 1 : 0) < 3;
+}
+
+function placeSlotReason(side, card, slot) {
+  const oldSlot = side.board[slot];
+  const lane = placementLane(card);
+  if (card.type === "eye" && slot !== "core") return "阵眼只能放入中台";
+  if (card.type !== "eye" && ![card.element, "core"].includes(slot)) return `只能放入${LABEL[card.element]}槽或中台`;
+  if (slotLane(oldSlot) === lane) return `替换已有${laneLabel(lane)}位`;
+  if (canPlaceIntoLane(side, card, slot)) return oldSlot ? `替换后不超过三${laneLabel(lane)}` : `放置后不超过三${laneLabel(lane)}`;
+  return `${laneLabel(lane)}位已有 3 张，不能新增`;
+}
+
+function placeChoices(side, card) {
+  const slots = card.type === "eye" ? ["core"] : [card.element, "core"];
+  return slots.map((slot) => {
+    const oldSlot = side.board[slot];
+    const legal = canPlaceIntoLane(side, card, slot);
+    const action = oldSlot ? `替换${oldSlot.card.name}` : "空槽";
+    const reason = placeSlotReason(side, card, slot);
+    return {
+      label: `${LABEL[slot]}槽：${action}（${reason}）`,
+      value: slot,
+      disabled: !legal,
+    };
+  });
+}
+
+function placePrompt(card, targets) {
+  const lane = placementLane(card);
+  const replacementOnly = lane === "attack"
+    ? countAttack(state.player) >= 3
+    : lane === "defense" && countDefense(state.player) >= 3;
+  if (replacementOnly) {
+    return `${lane === "attack" ? "攻击位" : "防守位"}已有 3 张，${card.name}只能替换已有${lane === "attack" ? "攻击" : "防守"}位。`;
   }
+  return `${card.name}只能放入${LABEL[card.element]}槽或中台；中台只能表侧。`;
+}
+
+function drawFillCard(side, slot) {
+  if (slot === "core" && Math.random() < 0.25) return drawEye();
+  const element = slot === "core" ? randomFive() : slot;
+  for (let i = 0; i < 24; i += 1) {
+    const card = drawCard(element);
+    if (canPlaceIntoLane(side, card, slot)) return card;
+  }
+  const fallback = cardPool[element].find((card) => canPlaceIntoLane(side, card, slot));
+  return fallback ? cloneCard(fallback, element) : drawCard(element);
+}
+
+function drawIntoSlot(side, sideKey, slot) {
+  const card = drawFillCard(side, slot);
   side.board[slot] = createSlot(card, slot, sideKey);
 }
 
@@ -499,26 +593,34 @@ function imbue(slot) {
   render();
 }
 
+function commitHandPlacement(handIndex, targetSlot, faceDown) {
+  const card = state.player.hand[handIndex];
+  if (!card) return false;
+  const oldSlot = state.player.board[targetSlot];
+  state.player.board[targetSlot] = createSlot(card, targetSlot, "player", faceDown);
+  state.player.hand.splice(handIndex, 1);
+  state.selectedHand = null;
+  state.selected = targetSlot;
+  const posture = faceDown ? "里侧" : "表侧";
+  log(oldSlot ? `玩家以${posture}${card.name}替换${LABEL[targetSlot]}槽的${oldSlot.card.name}。` : `玩家将${card.name}${posture}放入${LABEL[targetSlot]}槽。`);
+  render();
+  return true;
+}
+
 async function placeSelectedHand() {
   if (state.winner || state.active !== "player" || !["main1", "main2"].includes(state.phase) || state.selectedHand == null) return;
-  const card = state.player.hand[state.selectedHand];
-  const targets = placeTargets(state.player, card);
-  if (targets.length === 0) {
-    log(`攻击位已有 3 张，无法放置${card.name}。`);
-    return;
-  }
-  const targetSlot = targets.length === 1 ? targets[0] : await askTrigger({
+  const handIndex = state.selectedHand;
+  const card = state.player.hand[handIndex];
+  if (!card) return;
+  const choices = placeChoices(state.player, card);
+  const targetSlot = await askTrigger({
     title: "选择放置位置",
-    text: `${card.name}可以放入任意阵位；中台只能表侧。`,
-    options: targets.map((slot) => ({
-      label: `${LABEL[slot]}槽${state.player.board[slot] ? `：替换${state.player.board[slot].card.name}` : "：空槽"}`,
-      value: slot,
-    })),
+    text: `${card.name}只能放入${card.type === "eye" ? "中台" : LABEL[card.element] + "槽或中台"}；同类型可替换，不同类型需满足三攻三防上限，阵眼不计入攻防位。`,
+    options: choices,
     cancelLabel: "返回",
     cancelValue: null,
   });
   if (targetSlot == null) return;
-  const oldSlot = state.player.board[targetSlot];
   const faceDown = targetSlot !== "core" && card.type !== "eye" && await askTrigger({
     title: "放置姿态",
     text: `将${card.name}放入${LABEL[targetSlot]}槽。请选择表侧或里侧。`,
@@ -530,13 +632,7 @@ async function placeSelectedHand() {
     cancelValue: null,
   });
   if (faceDown == null) return;
-  state.player.board[targetSlot] = createSlot(card, targetSlot, "player", faceDown);
-  state.player.hand.splice(state.selectedHand, 1);
-  state.selectedHand = null;
-  state.selected = targetSlot;
-  const posture = faceDown ? "里侧" : "表侧";
-  log(oldSlot ? `玩家以${posture}${card.name}替换${LABEL[targetSlot]}槽的${oldSlot.card.name}。` : `玩家将${card.name}${posture}放入${LABEL[targetSlot]}槽。`);
-  render();
+  commitHandPlacement(handIndex, targetSlot, faceDown);
 }
 
 async function endTurn() {
@@ -747,6 +843,8 @@ function openTargetDialog() {
 function askTrigger({ title, text, options, cancelLabel = "关闭", cancelValue = false, required = false }) {
   return new Promise((resolve) => {
     const dialog = document.querySelector("#triggerDialog");
+    const form = dialog.querySelector("form");
+    form?.addEventListener("submit", (event) => event.preventDefault(), { once: true });
     document.querySelector("#triggerTitle").textContent = title;
     document.querySelector("#triggerText").textContent = text;
     const list = document.querySelector("#triggerList");
@@ -756,13 +854,18 @@ function askTrigger({ title, text, options, cancelLabel = "关闭", cancelValue 
       if (settled) return;
       settled = true;
       dialog.close();
-      resolve(value);
+      setTimeout(() => resolve(value), 0);
     };
     for (const option of options) {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = option.label;
-      button.addEventListener("click", () => settle(option.value));
+      button.disabled = Boolean(option.disabled);
+      if (option.disabled) button.classList.add("option-disabled");
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (!option.disabled) settle(option.value);
+      });
       list.append(button);
     }
     if (!required) {
@@ -770,7 +873,10 @@ function askTrigger({ title, text, options, cancelLabel = "关闭", cancelValue 
       cancel.type = "button";
       cancel.className = "secondary";
       cancel.textContent = cancelLabel;
-      cancel.addEventListener("click", () => settle(cancelValue));
+      cancel.addEventListener("click", (event) => {
+        event.preventDefault();
+        settle(cancelValue);
+      });
       list.append(cancel);
       dialog.addEventListener("cancel", () => settle(cancelValue), { once: true });
       dialog.addEventListener("close", () => settle(cancelValue), { once: true });
@@ -895,12 +1001,11 @@ function renderBoard(id, side, owner) {
     node.disabled = false;
     node.innerHTML = `
       <div class="slot-header">
-        <span>${LABEL[slot]}槽</span>
+        <span>${LABEL[slot]}</span>
         ${slotState ? `<span class="slot-type">${slotTypeMark(slotState)}</span>` : ""}
-        <span class="stones">${renderStones(slotState?.stones || 0)}</span>
       </div>
       ${renderSlotCard(slotState, owner)}
-      ${slotState ? `<span class="detail-button" role="button" aria-label="查看${LABEL[slot]}槽效果">查</span>` : ""}
+      ${slotState ? `<span class="detail-button" role="button" aria-label="查看${LABEL[slot]}槽效果">查看卡片</span>` : ""}
     `;
     node.addEventListener("click", () => {
       if (owner === "player" && state.active === "player" && !state.winner) {
@@ -923,19 +1028,20 @@ function renderBoard(id, side, owner) {
 function renderSlotCard(slotState, owner) {
   if (!slotState) return `<div class="card empty"><span>空</span></div>`;
   const hidden = owner === "enemy" && slotState.faceDown;
+  const valueText = slotState.mode === "eye" ? "阵眼" : `灵力:${slotState.hp + slotState.stones}`;
   if (hidden) {
     const hiddenMode = slotState.mode === "attack" ? "攻击" : slotState.mode === "ongoing" ? "永续" : "防守";
     return `
       <div class="card">
         <div class="card-name">里侧${hiddenMode}</div>
-        <div class="card-value">灵力 ${slotState.hp + slotState.stones}</div>
+        <div class="card-value">${valueText}</div>
       </div>
     `;
   }
   return `
     <div class="card">
       <div class="card-name">${slotState.card.name}</div>
-      <div class="card-value">${slotState.mode === "eye" ? "持续生效" : `灵力 ${slotState.hp + slotState.stones}`}</div>
+      <div class="card-value">${valueText}</div>
     </div>
   `;
 }
@@ -977,7 +1083,14 @@ function renderHand() {
     const node = document.createElement("button");
     node.type = "button";
     node.className = `hand-card ${state.selectedHand === index ? "selected" : ""}`;
-    node.innerHTML = `<strong>${card.name}</strong><span>${LABEL[card.element]} · ${TYPE[card.type]} · ${card.text}</span>`;
+    node.style.setProperty("--slot-color", COLOR[card.element]);
+    node.innerHTML = `
+      <span class="hand-element">${LABEL[card.element]}</span>
+      <span class="hand-type">${TYPE_MARK[card.type] || "术"}</span>
+      <strong>${card.name}</strong>
+      <span class="hand-value">${card.type === "eye" ? "阵眼" : `灵力:${card.value}`}</span>
+      <span class="hand-text">${TYPE[card.type]} · ${card.text}</span>
+    `;
     node.disabled = state.active !== "player" || Boolean(state.winner);
     node.addEventListener("click", () => {
       state.selectedHand = index;
