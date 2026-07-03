@@ -1010,7 +1010,7 @@ function initMusic() {
   const audio = document.querySelector("#bgm");
   const button = document.querySelector("#musicToggle");
   if (!audio || !button) return;
-  audio.volume = 0.26;
+  audio.volume = 0.34;
   const update = (enabled) => {
     button.textContent = enabled ? "乐 On" : "乐 Off";
     button.setAttribute("aria-pressed", String(enabled));
