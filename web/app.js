@@ -921,30 +921,21 @@ function renderBoard(id, side, owner) {
 }
 
 function renderSlotCard(slotState, owner) {
-  if (!slotState) return `<div class="card empty">空槽</div>`;
+  if (!slotState) return `<div class="card empty"><span>空</span></div>`;
   const hidden = owner === "enemy" && slotState.faceDown;
   if (hidden) {
     const hiddenMode = slotState.mode === "attack" ? "攻击" : slotState.mode === "ongoing" ? "永续" : "防守";
     return `
       <div class="card">
         <div class="card-name">里侧${hiddenMode}</div>
-        <div class="card-meta"><span class="tag">${LABEL[slotState.card.element]}</span><span class="tag">${hiddenMode}</span></div>
-        <div class="card-text">效果隐藏</div>
+        <div class="card-value">灵力 ${slotState.hp + slotState.stones}</div>
       </div>
     `;
   }
   return `
     <div class="card">
       <div class="card-name">${slotState.card.name}</div>
-      <div class="card-meta">
-        <span class="tag">${LABEL[slotState.card.element]}</span>
-        <span class="tag">${TYPE[slotState.card.type]}</span>
-        <span class="tag">${modeLabel(slotState)}</span>
-      </div>
-      <div class="card-text">${slotState.card.text}</div>
-      <div class="card-value">
-        <span>${slotState.mode === "eye" ? "持续生效" : `灵力 ${slotState.hp + slotState.stones}`}</span>
-      </div>
+      <div class="card-value">${slotState.mode === "eye" ? "持续生效" : `灵力 ${slotState.hp + slotState.stones}`}</div>
     </div>
   `;
 }

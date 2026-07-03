@@ -625,14 +625,17 @@ dialog h2 {
 
   body {
     min-height: 100svh;
-    padding-bottom: calc(92px + var(--safe-bottom));
+    overflow-x: hidden;
+    padding-bottom: calc(64px + var(--safe-bottom));
     background:
       radial-gradient(circle at 50% 8%, rgba(247, 243, 232, 0.1), transparent 20rem),
       linear-gradient(180deg, #101413, #151d1a 46%, #101419);
   }
 
   .app-shell {
-    padding: calc(6px + var(--safe-top)) 6px 8px;
+    width: 100%;
+    max-width: 430px;
+    padding: calc(4px + var(--safe-top)) 6px 6px;
   }
 
   .topbar {
@@ -642,8 +645,8 @@ dialog h2 {
     align-items: center;
     flex-direction: row;
     gap: 8px;
-    margin: calc(-8px - var(--safe-top)) -8px 8px;
-    padding: calc(6px + var(--safe-top)) 8px 6px;
+    margin: calc(-4px - var(--safe-top)) -6px 5px;
+    padding: calc(4px + var(--safe-top)) 6px 4px;
     background: rgba(16, 20, 19, 0.94);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -654,13 +657,13 @@ dialog h2 {
   }
 
   .music-toggle {
-    min-height: 34px;
-    padding: 0 8px;
-    font-size: 12px;
+    min-height: 29px;
+    padding: 0 7px;
+    font-size: 11px;
   }
 
   .topbar h1 {
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1.1;
   }
 
@@ -669,19 +672,19 @@ dialog h2 {
   }
 
   .round-panel {
-    min-width: 112px;
-    padding: 5px 8px;
+    min-width: 98px;
+    padding: 3px 7px;
     text-align: right;
     font-size: 12px;
   }
 
   .battlefield {
-    gap: 6px;
+    gap: 5px;
   }
 
   .player-area {
-    gap: 6px;
-    padding: 7px;
+    gap: 4px;
+    padding: 5px;
     border: 1px solid rgba(255, 253, 247, 0.42);
     border-radius: 12px;
     background:
@@ -691,31 +694,32 @@ dialog h2 {
   }
 
   .enemy-area {
-    padding-bottom: 8px;
+    padding-bottom: 5px;
     background:
       radial-gradient(circle at 50% 48%, rgba(74, 119, 138, 0.13), transparent 42%),
       linear-gradient(180deg, rgba(224, 231, 229, 0.98), rgba(200, 213, 209, 0.98));
   }
 
   .status-line {
-    padding: 4px 7px;
-    font-size: 12px;
+    min-height: 25px;
+    padding: 2px 7px;
+    font-size: 11px;
   }
 
   .status-line strong {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .board {
-    width: min(100%, 346px);
-    min-height: 224px;
+    width: 100%;
+    min-height: 0;
     max-height: none;
     aspect-ratio: auto;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(3, 66px);
-    gap: 8px;
-    padding: 10px;
+    grid-template-rows: repeat(3, 48px);
+    gap: 5px;
+    padding: 7px;
     border: 1px solid rgba(47, 53, 45, 0.14);
     border-radius: 14px;
     background:
@@ -733,16 +737,20 @@ dialog h2 {
 
   .slot {
     position: relative;
+    left: auto;
+    top: auto;
+    right: auto;
+    bottom: auto;
     width: 100%;
-    height: 66px;
-    min-height: 60px;
-    border-width: 1.5px;
-    border-radius: 9px;
+    height: 48px;
+    min-height: 48px;
+    border: 1.5px solid color-mix(in srgb, var(--slot-color) 78%, #1b241f);
+    border-radius: 7px;
     background:
-      linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(239, 232, 209, 0.96)),
-      color-mix(in srgb, var(--slot-color) 12%, white);
-    box-shadow: 0 7px 13px rgba(24, 32, 29, 0.17);
+      linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(238, 232, 214, 0.98));
+    box-shadow: 0 4px 9px rgba(24, 32, 29, 0.15);
     transform: none;
+    overflow: hidden;
   }
 
   .slot::before {
@@ -758,10 +766,10 @@ dialog h2 {
     grid-column: 2;
     grid-row: 2;
     width: 100%;
-    height: 66px;
-    min-height: 60px;
-    border-radius: 999px;
-    box-shadow: 0 0 0 3px rgba(255, 253, 247, 0.58), 0 8px 14px rgba(24, 32, 29, 0.18);
+    height: 48px;
+    min-height: 48px;
+    border-radius: 7px;
+    box-shadow: 0 0 0 2px rgba(255, 253, 247, 0.62), 0 4px 9px rgba(24, 32, 29, 0.16);
   }
 
   .slot.selected {
@@ -769,16 +777,21 @@ dialog h2 {
   }
 
   .slot-header {
-    height: 19px;
-    padding: 2px 4px;
+    height: 18px;
+    padding: 0 3px 0 5px;
     font-size: 10px;
     line-height: 1;
+    background: var(--slot-color);
+    color: #fffdf7;
   }
 
   .slot-type {
-    min-width: 17px;
-    height: 17px;
+    min-width: 16px;
+    height: 16px;
     margin-left: 2px;
+    border-radius: 50%;
+    background: rgba(255, 253, 247, 0.96);
+    color: var(--slot-color);
     font-size: 10px;
   }
 
@@ -792,24 +805,25 @@ dialog h2 {
   }
 
   .card {
-    height: calc(100% - 19px);
-    gap: 2px;
-    padding: 4px 5px 3px;
+    height: calc(100% - 18px);
+    gap: 0;
+    padding: 3px 25px 2px 5px;
     justify-content: flex-start;
-    background: rgba(255, 253, 247, 0.74);
+    background: transparent;
   }
 
   .card-name {
-    max-width: calc(100% - 24px);
-    padding-right: 0;
-    font-size: 11px;
-    line-height: 1.12;
+    max-width: 100%;
+    padding: 0;
+    font-size: 10px;
+    line-height: 1.08;
     color: #2a2f2b;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     overflow: hidden;
-    word-break: break-all;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
     text-shadow: none;
   }
 
@@ -820,11 +834,11 @@ dialog h2 {
   .detail-button {
     right: 3px;
     bottom: 3px;
-    width: 22px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     border-color: rgba(24, 32, 29, 0.12);
     background: rgba(255, 253, 247, 0.96);
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .card-meta,
@@ -834,42 +848,28 @@ dialog h2 {
 
   .card-value {
     margin-top: auto;
-    padding-right: 24px;
-    font-size: 9px;
+    padding-right: 0;
+    font-size: 8px;
     line-height: 1;
     color: rgba(42, 47, 43, 0.72);
   }
 
-  .slot-core .slot-header {
-    justify-content: center;
-  }
-
   .slot-core .slot-type {
     position: static;
-    min-width: 17px;
-    height: 17px;
+    min-width: 16px;
+    height: 16px;
     font-size: 10px;
   }
 
   .slot-core .card {
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 4px 5px 3px;
+    padding: 3px 25px 2px 5px;
     text-align: left;
   }
 
   .slot-core .card-name {
-    max-width: calc(100% - 24px);
-    font-size: 11px;
-    -webkit-line-clamp: 2;
-  }
-
-  .slot-core .type-mark {
-    right: 2px;
-    top: 18px;
-    width: 17px;
-    height: 17px;
-    font-size: 9px;
+    max-width: 100%;
+    font-size: 10px;
+    -webkit-line-clamp: 1;
   }
 
   .slot-core .card-value {
@@ -910,19 +910,19 @@ dialog h2 {
   }
 
   .selected-info {
-    min-height: 28px;
-    padding: 5px 8px;
+    min-height: 23px;
+    padding: 3px 8px;
     font-size: 11px;
   }
 
   .button-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 5px;
-    padding: 5px;
+    padding: 4px;
   }
 
   .button-grid button {
-    min-height: 34px;
+    min-height: 29px;
     padding: 0 6px;
     font-size: 12px;
   }
@@ -933,7 +933,7 @@ dialog h2 {
 
   .hand-panel {
     margin: 0 -6px;
-    padding: 5px 6px;
+    padding: 4px 6px;
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
@@ -953,8 +953,8 @@ dialog h2 {
 
   .hand-card {
     flex-basis: 108px;
-    min-height: 64px;
-    padding: 6px;
+    min-height: 56px;
+    padding: 5px;
   }
 
   .hand-card strong {
