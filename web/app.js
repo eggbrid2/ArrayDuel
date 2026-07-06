@@ -13,6 +13,9 @@ const CONTROLS = {
 };
 const OVERCOME = { wood: "earth", fire: "metal", earth: "water", metal: "wood", water: "fire" };
 const GENERATES = { wood: "fire", fire: "earth", earth: "metal", metal: "water", water: "wood" };
+const START_HP = 18;
+const MAX_HP = 24;
+const DRAW_WEIGHT = { attack: 3, defense: 1, heal: 1, counter: 1, destroy: 1, ongoing: 1 };
 const AI_CONFIG_KEY = "arrayDuelAiConfig";
 const DEFAULT_AI_CONFIG = {
   enabled: true,
@@ -24,7 +27,9 @@ const DEFAULT_AI_CONFIG = {
 const cardPool = {
   wood: [
     { name: "青藤剑诀", type: "attack", value: 2, text: "攻击木、土、水目标。克制灵力 x2。" },
-    { name: "万木穿岩", type: "attack", value: 1, text: "攻击永续时灵力相减。" },
+    { name: "万木穿岩", type: "attack", value: 2, text: "攻击永续时灵力相减。" },
+    { name: "扶桑破阵", type: "attack", value: 3, text: "高灵力木系攻击。" },
+    { name: "藤影连刺", type: "attack", value: 2, text: "稳定攻击，适合补刀空槽。" },
     { name: "灵藤护身", type: "defense", value: 2, text: "抵消 2 点伤害。" },
     { name: "春生术", type: "heal", value: 2, text: "触发时回复 2 生命。" },
     { name: "青藤反缚", type: "counter", value: 1, text: "抵消 1，并反击 1。" },
@@ -33,7 +38,9 @@ const cardPool = {
   ],
   fire: [
     { name: "赤霄火剑", type: "attack", value: 2, text: "攻击火、金、木目标。克制灵力 x2。" },
-    { name: "流火飞星", type: "attack", value: 1, text: "中台发动可攻击任意五行槽。" },
+    { name: "流火飞星", type: "attack", value: 2, text: "中台发动可攻击任意五行槽。" },
+    { name: "朱雀焚阵", type: "attack", value: 3, text: "高灵力火系攻击。" },
+    { name: "炎龙吐息", type: "attack", value: 2, text: "稳定攻击，克金破木。" },
     { name: "烈焰护体", type: "defense", value: 1, text: "抵消 1，并可反击。" },
     { name: "丹火续脉", type: "heal", value: 2, text: "触发时回复 2。" },
     { name: "火鸦返击", type: "counter", value: 2, text: "反击 2。" },
@@ -43,6 +50,8 @@ const cardPool = {
   earth: [
     { name: "镇岳印", type: "attack", value: 2, text: "攻击土、水、火目标。克制灵力 x2。" },
     { name: "昆仑坠", type: "attack", value: 3, text: "高灵力攻击。" },
+    { name: "山河镇杀", type: "attack", value: 3, text: "高灵力土系攻击。" },
+    { name: "裂地灵锥", type: "attack", value: 2, text: "稳定攻击，压制水火。" },
     { name: "玄岩盾", type: "defense", value: 2, text: "抵消 2 点伤害。" },
     { name: "地脉回息", type: "heal", value: 1, text: "回复 1，补灵 1。" },
     { name: "崩山反震", type: "counter", value: 1, text: "抵消 1，反击 1。" },
@@ -51,7 +60,9 @@ const cardPool = {
   ],
   metal: [
     { name: "庚金飞刃", type: "attack", value: 2, text: "攻击金、木、土目标。克制灵力 x2。" },
-    { name: "破甲剑光", type: "attack", value: 1, text: "无视 1 点防御。" },
+    { name: "破甲剑光", type: "attack", value: 2, text: "无视 1 点防御。" },
+    { name: "太白斩灵", type: "attack", value: 3, text: "高灵力金系攻击。" },
+    { name: "百炼剑雨", type: "attack", value: 2, text: "稳定攻击，破木镇土。" },
     { name: "金钟罩", type: "defense", value: 2, text: "抵消 2。" },
     { name: "玉液金丹", type: "heal", value: 2, text: "回复 2 生命。" },
     { name: "镜刃反照", type: "counter", value: 1, text: "抵消 1，复制反击。" },
@@ -60,7 +71,9 @@ const cardPool = {
   ],
   water: [
     { name: "寒泉剑气", type: "attack", value: 2, text: "攻击水、火、金目标。克制灵力 x2。" },
-    { name: "冰魄飞针", type: "attack", value: 1, text: "对火克制更强。" },
+    { name: "冰魄飞针", type: "attack", value: 2, text: "对火克制更强。" },
+    { name: "玄浪吞火", type: "attack", value: 3, text: "高灵力水系攻击。" },
+    { name: "沧海灵刃", type: "attack", value: 2, text: "稳定攻击，克火生木。" },
     { name: "水镜术", type: "defense", value: 1, text: "抵消 1，并回复 1。" },
     { name: "甘霖诀", type: "heal", value: 2, text: "回复 2 生命。" },
     { name: "寒潭倒影", type: "counter", value: 1, text: "抵消 1，反击 1。" },
@@ -103,7 +116,7 @@ const aiState = {
 function createSide(name) {
   return {
     name,
-    hp: 24,
+    hp: START_HP,
     stones: 0,
     hand: [],
     board: Object.fromEntries(ELEMENTS.map((slot) => [slot, null])),
@@ -129,7 +142,8 @@ function createSlot(card, slot, owner, faceDown = false) {
 
 function drawCard(element) {
   const pool = cardPool[element];
-  return cloneCard(pool[Math.floor(Math.random() * pool.length)], element);
+  const weightedPool = pool.flatMap((card) => Array.from({ length: DRAW_WEIGHT[card.type] || 1 }, () => card));
+  return cloneCard(weightedPool[Math.floor(Math.random() * weightedPool.length)], element);
 }
 
 function drawEye() {
@@ -294,7 +308,7 @@ function triggerOngoing(side) {
   for (const slot of Object.values(side.board)) {
     if (!slot || slot.mode !== "ongoing") continue;
     if (slot.card.name.includes("灵泉")) {
-      side.hp = Math.min(30, side.hp + 1);
+      side.hp = Math.min(MAX_HP, side.hp + 1);
       log(`${side.name}的${slot.card.name}回复 1 生命。`);
     }
     if (slot.card.name.includes("寒潭")) {
@@ -368,11 +382,11 @@ async function resolveCard(side, opponent, source, targetSlot) {
     consumeSource(side, source);
   } else if (card.type === "heal") {
     const amount = card.value * multiplier + (slotState?.stones || 0);
-    side.hp = Math.min(30, side.hp + amount);
+    side.hp = Math.min(MAX_HP, side.hp + amount);
     log(`${side.name}发动${card.name}回复 ${amount} 生命。`);
     consumeSource(side, source);
   } else if (card.type === "counter" || card.type === "defense") {
-    side.hp = Math.min(30, side.hp + 1 + (slotState?.stones || 0));
+    side.hp = Math.min(MAX_HP, side.hp + 1 + (slotState?.stones || 0));
     log(`${side.name}主动运转${card.name}，回复 ${1 + (slotState?.stones || 0)} 生命。`);
     consumeSource(side, source);
   } else if (card.type === "destroy") {
@@ -513,7 +527,7 @@ function resolveDefenseEffect(label, slotState, amount, sourceCard) {
   const boost = slotState.stones || 0;
   if (card.type === "heal") {
     const heal = card.value + boost;
-    state.player.hp = Math.min(30, state.player.hp + heal);
+    state.player.hp = Math.min(MAX_HP, state.player.hp + heal);
     log(`玩家翻开${label}${card.name}，回复 ${heal} 生命。`);
     return amount;
   }
@@ -571,7 +585,7 @@ function resolveLianxieEffect(slot, slotState, amount, sourceCard) {
   }
   if (card.type === "heal") {
     const heal = card.value + boost;
-    state.player.hp = Math.min(30, state.player.hp + heal);
+    state.player.hp = Math.min(MAX_HP, state.player.hp + heal);
     log(`联协发动${LABEL[slot]}槽${card.name}，回复 ${heal} 生命。`);
     return amount;
   }
