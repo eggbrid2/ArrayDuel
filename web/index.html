@@ -12,6 +12,29 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <section id="startScreen" class="start-screen" aria-label="斗阵开始界面">
+      <div class="start-panel">
+        <div class="start-array" aria-hidden="true">
+          <span class="start-node start-fire">火</span>
+          <span class="start-node start-earth">土</span>
+          <span class="start-node start-metal">金</span>
+          <span class="start-node start-water">水</span>
+          <span class="start-node start-wood">木</span>
+          <span class="start-core">阵</span>
+        </div>
+        <div class="start-copy">
+          <span class="start-kicker">Array Duel</span>
+          <h1>斗阵</h1>
+          <p>六槽五行，攻防换位。以灵力破阵，以相生联协守住命门。</p>
+        </div>
+        <div class="start-actions">
+          <button id="startGameBtn" class="primary-action" type="button">开始游戏</button>
+          <button id="startRulesBtn" class="secondary-action" type="button">游戏规则</button>
+          <button id="startAiBtn" class="secondary-action" type="button">AI 设置</button>
+        </div>
+      </div>
+    </section>
+
     <main class="app-shell">
       <section class="topbar">
         <div>
@@ -19,6 +42,8 @@
           <p>Array Duel · 六槽阵法 · 灵力流转</p>
         </div>
         <div class="topbar-right">
+          <button id="rulesBtn" class="music-toggle" type="button">规则</button>
+          <button id="restartBtn" class="music-toggle" type="button">重开</button>
           <button id="aiSettingsBtn" class="music-toggle" type="button">AI设置</button>
           <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">乐 Off</button>
           <div class="round-panel">
@@ -111,6 +136,21 @@
       </form>
     </dialog>
 
+    <dialog id="rulesDialog">
+      <form method="dialog">
+        <h2>游戏规则</h2>
+        <div class="rules-list">
+          <p><strong>阵位</strong>五行槽只能放同属性卡或中台；中台可以放任意属性，阵眼只能放中台。</p>
+          <p><strong>放置</strong>主阶段可用手卡替换卡槽。同类型可直接替换，不同类型替换后不能打破三攻三防限制，阵眼不算防守位。</p>
+          <p><strong>阶段</strong>每回合依次经过准备、主1、发动、主2、结束。只有点击下一阶段或结束回合才推进流程。</p>
+          <p><strong>战斗</strong>攻击槽对攻击槽按灵力相减，并计算五行克制；溢出不反伤。攻击空槽会直接伤害生命。</p>
+          <p><strong>防守</strong>防守卡可表侧或里侧放置。被攻击时会询问是否发动防守和相生联协，联协不能发动攻击卡。</p>
+          <p><strong>手卡</strong>开局填满六槽并获得五张手卡；每回合随机抽一张，结束时手卡超过六张需要舍弃。</p>
+        </div>
+        <button value="close" class="secondary">关闭</button>
+      </form>
+    </dialog>
+
     <dialog id="aiDialog">
       <form id="aiForm" method="dialog">
         <h2>大模型对战设置</h2>
@@ -138,11 +178,7 @@
             <option value="glm-4-flash">glm-4-flash</option>
           </select>
         </label>
-        <label class="field-line">
-          <span>API Key</span>
-          <input id="aiApiKey" type="password" autocomplete="off" placeholder="sk-..." />
-        </label>
-        <p class="trigger-text">默认使用服务器内置 AI 代理，无需填写 Key。改成自己的 OpenAI 兼容网关时，可填写 API 地址、模型和 Key。</p>
+        <p class="trigger-text">前端不保存也不发送 API Key。默认使用服务器内置 AI 代理；如需接入自己的模型网关，请把 Key 放在自己的后端代理里。</p>
         <div class="target-list">
           <button id="saveAiSettings" type="submit">保存</button>
           <button value="close" class="secondary" type="button" id="closeAiSettings">关闭</button>

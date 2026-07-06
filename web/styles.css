@@ -51,6 +51,139 @@ button:disabled {
   opacity: 0.45;
 }
 
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: calc(22px + var(--safe-top)) 18px calc(22px + var(--safe-bottom));
+  background:
+    radial-gradient(circle at 50% 34%, rgba(229, 197, 116, 0.16), transparent 18rem),
+    radial-gradient(circle at 20% 78%, rgba(50, 122, 161, 0.15), transparent 18rem),
+    linear-gradient(145deg, #0d1210, #172018 52%, #0b1216);
+  color: #fffdf7;
+  transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.start-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.start-panel {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  width: min(460px, 100%);
+}
+
+.start-array {
+  position: relative;
+  width: min(74vw, 300px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(229, 197, 116, 0.24);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 249, 221, 0.16) 0 14%, transparent 14.5%),
+    radial-gradient(circle at 50% 50%, transparent 0 38%, rgba(229, 197, 116, 0.16) 38.3% 39%, transparent 39.4%),
+    linear-gradient(90deg, transparent 49.8%, rgba(229, 197, 116, 0.18) 50%, transparent 50.2%),
+    linear-gradient(30deg, transparent 49.8%, rgba(229, 197, 116, 0.14) 50%, transparent 50.2%),
+    linear-gradient(150deg, transparent 49.8%, rgba(229, 197, 116, 0.14) 50%, transparent 50.2%);
+  box-shadow: inset 0 0 28px rgba(229, 197, 116, 0.08), 0 18px 60px rgba(0, 0, 0, 0.28);
+}
+
+.start-node,
+.start-core {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 900;
+  transform: translate(-50%, -50%);
+}
+
+.start-node {
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 253, 247, 0.56);
+  color: #fffdf7;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.34);
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.38), inset 0 -6px 12px rgba(0, 0, 0, 0.18), 0 8px 22px rgba(0, 0, 0, 0.24);
+}
+
+.start-fire { left: 50%; top: 9%; background: #c94c31; }
+.start-earth { left: 22%; top: 38%; background: #9a7a3f; }
+.start-metal { left: 78%; top: 38%; background: #7d8790; }
+.start-water { left: 32%; top: 80%; background: #327aa1; }
+.start-wood { left: 68%; top: 80%; background: #3f8a57; }
+
+.start-core {
+  left: 50%;
+  top: 50%;
+  width: 62px;
+  height: 62px;
+  border: 1px solid rgba(255, 245, 188, 0.72);
+  background: radial-gradient(circle at 38% 24%, #fff7c9, #d9a844 56%, #8a5b1f);
+  color: #2b1c0a;
+  box-shadow: 0 0 26px rgba(229, 197, 116, 0.3), inset 0 2px 5px rgba(255, 255, 255, 0.55);
+}
+
+.start-copy {
+  text-align: center;
+}
+
+.start-kicker {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: rgba(255, 253, 247, 0.62);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.start-copy h1 {
+  margin: 0;
+  font-size: clamp(44px, 12vw, 72px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.start-copy p {
+  max-width: 390px;
+  margin: 12px auto 0;
+  color: rgba(255, 253, 247, 0.72);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.start-actions {
+  display: grid;
+  gap: 10px;
+  width: min(320px, 100%);
+}
+
+.primary-action,
+.secondary-action {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 10px;
+}
+
+.primary-action {
+  border-color: rgba(229, 197, 116, 0.72);
+  background: linear-gradient(180deg, #e5c574, #b98434);
+  color: #17140c;
+  box-shadow: 0 8px 28px rgba(229, 197, 116, 0.18);
+}
+
+.secondary-action {
+  border-color: rgba(255, 253, 247, 0.18);
+  background: rgba(255, 253, 247, 0.1);
+}
+
 .app-shell {
   width: min(1280px, 100%);
   margin: 0 auto;
@@ -170,19 +303,21 @@ button:disabled {
   position: relative;
   display: block;
   min-height: 0;
-  height: clamp(300px, 32vw, 430px);
+  height: clamp(310px, 31vw, 390px);
   max-height: none;
   margin: 0 auto;
-  width: min(100%, 560px);
-  border: 1px solid rgba(255, 253, 247, 0.34);
-  border-radius: 30px;
+  width: min(100%, 500px);
+  border: 1px solid rgba(119, 91, 44, 0.22);
+  border-radius: 18px;
   background:
-    radial-gradient(circle at 50% 51%, rgba(255, 248, 219, 0.88) 0 11%, transparent 11.5%),
-    radial-gradient(circle at 50% 51%, transparent 0 33%, rgba(255, 253, 247, 0.42) 33.5% 34.4%, transparent 35%),
-    radial-gradient(circle at 50% 51%, transparent 0 46%, rgba(26, 36, 33, 0.2) 46.4% 47.1%, transparent 47.8%),
-    conic-gradient(from -90deg, rgba(201, 76, 49, 0.24), rgba(154, 122, 63, 0.2), rgba(125, 135, 144, 0.18), rgba(50, 122, 161, 0.22), rgba(63, 138, 87, 0.22), rgba(201, 76, 49, 0.24)),
-    linear-gradient(180deg, rgba(39, 50, 45, 0.22), rgba(255, 253, 247, 0.08));
-  box-shadow: inset 0 0 0 5px rgba(255, 253, 247, 0.18), inset 0 0 30px rgba(24, 32, 29, 0.18);
+    radial-gradient(circle at 50% 50%, rgba(255, 249, 221, 0.88) 0 10%, transparent 10.5%),
+    radial-gradient(circle at 50% 50%, transparent 0 33%, rgba(132, 98, 47, 0.16) 33.2% 33.8%, transparent 34.2%),
+    radial-gradient(circle at 50% 50%, transparent 0 46%, rgba(132, 98, 47, 0.12) 46.2% 46.8%, transparent 47.2%),
+    linear-gradient(90deg, transparent 49.8%, rgba(132, 98, 47, 0.12) 50%, transparent 50.2%),
+    linear-gradient(30deg, transparent 49.8%, rgba(132, 98, 47, 0.11) 50%, transparent 50.2%),
+    linear-gradient(150deg, transparent 49.8%, rgba(132, 98, 47, 0.11) 50%, transparent 50.2%),
+    linear-gradient(180deg, rgba(248, 241, 218, 0.72), rgba(227, 216, 184, 0.55));
+  box-shadow: inset 0 0 0 1px rgba(255, 253, 247, 0.62), inset 0 0 28px rgba(119, 91, 44, 0.12);
   overflow: visible;
 }
 
@@ -195,25 +330,25 @@ button:disabled {
 }
 
 .board::before {
-  left: 18%;
-  top: 14%;
-  width: 64%;
-  height: 72%;
-  border: 1px solid rgba(255, 253, 247, 0.34);
+  left: 17%;
+  top: 12%;
+  width: 66%;
+  height: 76%;
+  border: 1px solid rgba(119, 91, 44, 0.18);
   border-radius: 50%;
   background:
-    linear-gradient(60deg, transparent 49.5%, rgba(255, 253, 247, 0.34) 49.8% 50.2%, transparent 50.5%),
-    linear-gradient(120deg, transparent 49.5%, rgba(255, 253, 247, 0.28) 49.8% 50.2%, transparent 50.5%),
-    linear-gradient(180deg, transparent 49.5%, rgba(255, 253, 247, 0.26) 49.8% 50.2%, transparent 50.5%);
-  opacity: 0.95;
+    linear-gradient(60deg, transparent 49.6%, rgba(119, 91, 44, 0.18) 49.9% 50.1%, transparent 50.4%),
+    linear-gradient(120deg, transparent 49.6%, rgba(119, 91, 44, 0.16) 49.9% 50.1%, transparent 50.4%),
+    linear-gradient(180deg, transparent 49.6%, rgba(119, 91, 44, 0.12) 49.9% 50.1%, transparent 50.4%);
+  opacity: 1;
 }
 
 .board::after {
   left: 50%;
-  top: 51%;
-  width: 112px;
-  height: 112px;
-  border: 1px dashed rgba(255, 253, 247, 0.42);
+  top: 50%;
+  width: 104px;
+  height: 104px;
+  border: 1px dashed rgba(132, 98, 47, 0.28);
   border-radius: 50%;
   border-style: dashed;
   transform: translate(-50%, -50%);
@@ -221,60 +356,59 @@ button:disabled {
 
 .slot {
   position: absolute;
-  width: clamp(78px, 8vw, 108px);
-  height: clamp(78px, 8vw, 108px);
+  width: clamp(72px, 7.4vw, 94px);
+  height: clamp(72px, 7.4vw, 94px);
   min-height: 0;
-  border: 1.5px solid color-mix(in srgb, var(--slot-color) 72%, #fffdf7);
+  border: 1px solid color-mix(in srgb, var(--slot-color) 56%, #fff6d6);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 47%, rgba(255, 253, 247, 0.94) 0 34%, color-mix(in srgb, var(--slot-color) 24%, rgba(255, 253, 247, 0.85)) 35% 49%, transparent 50%),
-    conic-gradient(from 8deg, color-mix(in srgb, var(--slot-color) 68%, #fffdf7), transparent 12%, transparent 20%, rgba(255,255,255,0.9) 22%, transparent 25%, transparent 42%, color-mix(in srgb, var(--slot-color) 58%, #fffdf7), transparent 55%, transparent 73%, rgba(255,255,255,0.75), transparent 82%),
-    radial-gradient(circle, color-mix(in srgb, var(--slot-color) 18%, #161f1d), rgba(18, 26, 22, 0.2));
+    radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.92) 0 10%, transparent 11%),
+    radial-gradient(circle at 50% 46%, rgba(255, 253, 244, 0.96) 0 42%, color-mix(in srgb, var(--slot-color) 18%, #fff4cf) 43% 66%, color-mix(in srgb, var(--slot-color) 44%, #6f4b22) 67% 100%);
   overflow: visible;
   touch-action: manipulation;
-  box-shadow: 0 0 0 4px rgba(255, 253, 247, 0.24), 0 0 18px color-mix(in srgb, var(--slot-color) 44%, transparent), 0 8px 16px rgba(24, 32, 29, 0.2);
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.58), inset 0 -5px 10px rgba(40, 28, 12, 0.12), 0 4px 12px rgba(24, 32, 29, 0.18);
   transform: translate(-50%, -50%);
 }
 
 .slot::before {
   content: "";
   position: absolute;
-  inset: 7px;
-  border: 1px solid rgba(255, 253, 247, 0.72);
+  inset: 5px;
+  border: 1px solid rgba(255, 253, 247, 0.78);
   border-radius: 50%;
-  opacity: 0.9;
+  opacity: 0.8;
   pointer-events: none;
 }
 
-.slot-fire { left: 50%; top: 15%; }
-.slot-earth { left: 21%; top: 43%; }
-.slot-metal { left: 79%; top: 43%; }
-.slot-water { left: 32%; top: 78%; }
-.slot-wood { left: 68%; top: 78%; }
+.slot-fire { left: 50%; top: 14%; }
+.slot-earth { left: 23%; top: 41%; }
+.slot-metal { left: 77%; top: 41%; }
+.slot-water { left: 33%; top: 78%; }
+.slot-wood { left: 67%; top: 78%; }
 .slot-core {
   left: 50%;
-  top: 51%;
-  width: clamp(68px, 7vw, 96px);
-  height: clamp(68px, 7vw, 96px);
+  top: 50%;
+  width: clamp(64px, 6.6vw, 84px);
+  height: clamp(64px, 6.6vw, 84px);
   border-radius: 50%;
   z-index: 2;
   background:
-    radial-gradient(circle at 50% 44%, rgba(255, 248, 214, 0.98) 0 34%, rgba(190, 145, 55, 0.3) 35% 50%, transparent 51%),
-    conic-gradient(from 0deg, #f0ca69, transparent 14%, transparent 28%, #fff5bd 35%, transparent 48%, #d99f38 64%, transparent 78%, #fff1a6);
-  box-shadow: 0 0 0 4px rgba(255, 253, 247, 0.3), 0 0 22px rgba(214, 165, 60, 0.5), 0 8px 16px rgba(24, 32, 29, 0.2);
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.94) 0 12%, transparent 13%),
+    radial-gradient(circle at 50% 46%, rgba(255, 248, 214, 0.98) 0 44%, rgba(213, 158, 54, 0.34) 45% 68%, #b77a28 69% 100%);
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.58), inset 0 -5px 10px rgba(84, 50, 7, 0.16), 0 0 18px rgba(214, 165, 60, 0.34), 0 4px 12px rgba(24, 32, 29, 0.18);
 }
 
 .slot.selected {
-  outline: 3px solid #111;
-  outline-offset: 2px;
+  outline: 2px solid #1f2a23;
+  outline-offset: 3px;
 }
 
 .slot.attack-mode {
-  box-shadow: inset 0 -5px 0 color-mix(in srgb, var(--danger) 74%, #fff);
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.58), inset 0 -5px 10px rgba(40, 28, 12, 0.12), 0 0 0 3px rgba(161, 54, 36, 0.16), 0 4px 12px rgba(24, 32, 29, 0.18);
 }
 
 .slot.defense-mode {
-  box-shadow: inset 0 -5px 0 #2f5f89;
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.58), inset 0 -5px 10px rgba(40, 28, 12, 0.12), 0 0 0 3px rgba(47, 95, 137, 0.16), 0 4px 12px rgba(24, 32, 29, 0.18);
 }
 
 .slot.face-down .card {
@@ -314,42 +448,42 @@ button:disabled {
 .slot-header span:first-child {
   position: absolute;
   left: 50%;
-  top: -13px;
+  top: -12px;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   max-width: none;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--slot-color) 62%, #fffdf7);
+  border: 1px solid color-mix(in srgb, var(--slot-color) 54%, #fffdf7);
   border-radius: 50%;
   background:
     radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.92) 0 16%, rgba(255, 255, 255, 0.42) 17% 28%, transparent 29%),
-    radial-gradient(circle at 58% 68%, color-mix(in srgb, var(--slot-color) 74%, #111) 0 42%, var(--slot-color) 43% 100%);
+    radial-gradient(circle at 58% 68%, color-mix(in srgb, var(--slot-color) 64%, #2d2114) 0 42%, var(--slot-color) 43% 100%);
   color: #fffdf7;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
   line-height: 1;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.38);
   transform: translateX(-50%);
-  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.18), inset 0 1px 2px rgba(255, 255, 255, 0.62), 0 3px 8px rgba(24, 32, 29, 0.28);
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.16), inset 0 1px 2px rgba(255, 255, 255, 0.62), 0 2px 6px rgba(24, 32, 29, 0.2);
 }
 
 .slot-type {
   position: absolute;
-  right: 3px;
-  bottom: 4px;
+  right: 1px;
+  bottom: 3px;
   top: auto;
   flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
   min-width: 22px;
-  width: 25px;
-  height: 21px;
+  width: 24px;
+  height: 20px;
   margin-left: 0;
   border: 1px solid rgba(255, 253, 247, 0.76);
   border-radius: 50%;
-  background: color-mix(in srgb, var(--slot-color) 78%, #151b19);
+  background: color-mix(in srgb, var(--slot-color) 66%, #211712);
   color: #fffdf7;
   font-size: 12px;
   font-weight: 900;
@@ -373,7 +507,7 @@ button:disabled {
 
 .card {
   position: absolute;
-  inset: 18px 10px 14px;
+  inset: 17px 8px 14px;
   height: auto;
   padding: 0;
   display: flex;
@@ -394,9 +528,9 @@ button:disabled {
 }
 
 .card-name {
-  max-width: 74px;
+  max-width: 66px;
   padding: 0;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.08;
   font-weight: 900;
   color: #2a2f2b;
@@ -426,19 +560,19 @@ button:disabled {
 
 .detail-button {
   position: absolute;
-  left: 42%;
+  left: 50%;
   right: auto;
-  bottom: -17px;
+  bottom: -18px;
   z-index: 3;
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 20px;
-  border: 1px solid rgba(255, 253, 247, 0.72);
+  width: 56px;
+  height: 19px;
+  border: 1px solid rgba(255, 253, 247, 0.86);
   border-radius: 999px;
-  background: rgba(18, 26, 22, 0.92);
+  background: rgba(38, 32, 21, 0.88);
   color: #fffdf7;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1;
   font-weight: 900;
   transform: translateX(-50%);
@@ -471,13 +605,13 @@ button:disabled {
   display: grid;
   place-items: center;
   width: auto;
-  min-width: 46px;
+  min-width: 44px;
   height: 18px;
   margin-top: 0;
   padding: 0 6px;
   border: 1px solid rgba(24, 32, 29, 0.14);
   border-radius: 5px;
-  background: rgba(255, 253, 247, 0.86);
+  background: rgba(255, 253, 247, 0.78);
   color: color-mix(in srgb, var(--slot-color) 72%, #111);
   font-size: 10px;
   font-weight: 900;
@@ -487,8 +621,8 @@ button:disabled {
 }
 
 .slot-core .card-name {
-  max-width: 58px;
-  font-size: 11px;
+  max-width: 52px;
+  font-size: 10px;
 }
 
 .slot.face-down .card {
@@ -1045,21 +1179,23 @@ dialog h2 {
     position: relative;
     display: block;
     width: min(100%, 342px);
-    height: clamp(206px, 56vw, 226px);
+    height: clamp(210px, 56vw, 228px);
     min-height: 0;
     max-height: none;
     aspect-ratio: auto;
     margin: 0 auto;
     padding: 0;
-    border: 1px solid rgba(255, 253, 247, 0.34);
-    border-radius: 26px;
+    border: 1px solid rgba(119, 91, 44, 0.22);
+    border-radius: 16px;
     background:
-      radial-gradient(circle at 50% 51%, rgba(255, 248, 219, 0.88) 0 11%, transparent 11.5%),
-      radial-gradient(circle at 50% 51%, transparent 0 33%, rgba(255, 253, 247, 0.42) 33.5% 34.4%, transparent 35%),
-      radial-gradient(circle at 50% 51%, transparent 0 46%, rgba(26, 36, 33, 0.2) 46.4% 47.1%, transparent 47.8%),
-      conic-gradient(from -90deg, rgba(201, 76, 49, 0.24), rgba(154, 122, 63, 0.2), rgba(125, 135, 144, 0.18), rgba(50, 122, 161, 0.22), rgba(63, 138, 87, 0.22), rgba(201, 76, 49, 0.24)),
-      linear-gradient(180deg, rgba(39, 50, 45, 0.22), rgba(255, 253, 247, 0.08));
-    box-shadow: inset 0 0 0 5px rgba(255, 253, 247, 0.18), inset 0 0 26px rgba(24, 32, 29, 0.18);
+      radial-gradient(circle at 50% 50%, rgba(255, 249, 221, 0.88) 0 10%, transparent 10.5%),
+      radial-gradient(circle at 50% 50%, transparent 0 33%, rgba(132, 98, 47, 0.16) 33.2% 33.8%, transparent 34.2%),
+      radial-gradient(circle at 50% 50%, transparent 0 46%, rgba(132, 98, 47, 0.12) 46.2% 46.8%, transparent 47.2%),
+      linear-gradient(90deg, transparent 49.8%, rgba(132, 98, 47, 0.12) 50%, transparent 50.2%),
+      linear-gradient(30deg, transparent 49.8%, rgba(132, 98, 47, 0.11) 50%, transparent 50.2%),
+      linear-gradient(150deg, transparent 49.8%, rgba(132, 98, 47, 0.11) 50%, transparent 50.2%),
+      linear-gradient(180deg, rgba(248, 241, 218, 0.72), rgba(227, 216, 184, 0.55));
+    box-shadow: inset 0 0 0 1px rgba(255, 253, 247, 0.62), inset 0 0 22px rgba(119, 91, 44, 0.12);
     overflow: visible;
   }
 
@@ -1072,26 +1208,26 @@ dialog h2 {
   }
 
   .board::before {
-    left: 18%;
+    left: 17%;
     right: auto;
-    top: 14%;
-    width: 64%;
-    height: 72%;
-    border: 1px solid rgba(255, 253, 247, 0.34);
+    top: 12%;
+    width: 66%;
+    height: 76%;
+    border: 1px solid rgba(119, 91, 44, 0.18);
     border-radius: 50%;
     background:
-      linear-gradient(60deg, transparent 49.5%, rgba(255, 253, 247, 0.34) 49.8% 50.2%, transparent 50.5%),
-      linear-gradient(120deg, transparent 49.5%, rgba(255, 253, 247, 0.28) 49.8% 50.2%, transparent 50.5%),
-      linear-gradient(180deg, transparent 49.5%, rgba(255, 253, 247, 0.26) 49.8% 50.2%, transparent 50.5%);
-    opacity: 0.95;
+      linear-gradient(60deg, transparent 49.6%, rgba(119, 91, 44, 0.18) 49.9% 50.1%, transparent 50.4%),
+      linear-gradient(120deg, transparent 49.6%, rgba(119, 91, 44, 0.16) 49.9% 50.1%, transparent 50.4%),
+      linear-gradient(180deg, transparent 49.6%, rgba(119, 91, 44, 0.12) 49.9% 50.1%, transparent 50.4%);
+    opacity: 1;
   }
 
   .board::after {
     left: 50%;
-    top: 51%;
+    top: 50%;
     width: 74px;
     height: 74px;
-    border: 1px dashed rgba(255, 253, 247, 0.42);
+    border: 1px dashed rgba(132, 98, 47, 0.28);
     border-radius: 50%;
     transform: translate(-50%, -50%);
   }
@@ -1102,16 +1238,15 @@ dialog h2 {
     top: auto;
     right: auto;
     bottom: auto;
-    width: clamp(56px, 17.5vw, 66px);
-    height: clamp(56px, 17.5vw, 66px);
+    width: clamp(56px, 17.2vw, 64px);
+    height: clamp(56px, 17.2vw, 64px);
     min-height: 0;
-    border: 1.5px solid color-mix(in srgb, var(--slot-color) 72%, #fffdf7);
+    border: 1px solid color-mix(in srgb, var(--slot-color) 56%, #fff6d6);
     border-radius: 50%;
     background:
-      radial-gradient(circle at 50% 47%, rgba(255, 253, 247, 0.94) 0 34%, color-mix(in srgb, var(--slot-color) 24%, rgba(255, 253, 247, 0.85)) 35% 49%, transparent 50%),
-      conic-gradient(from 8deg, color-mix(in srgb, var(--slot-color) 68%, #fffdf7), transparent 12%, transparent 20%, rgba(255,255,255,0.9) 22%, transparent 25%, transparent 42%, color-mix(in srgb, var(--slot-color) 58%, #fffdf7), transparent 55%, transparent 73%, rgba(255,255,255,0.75), transparent 82%),
-      radial-gradient(circle, color-mix(in srgb, var(--slot-color) 18%, #161f1d), rgba(18, 26, 22, 0.2));
-    box-shadow: 0 0 0 3px rgba(255, 253, 247, 0.24), 0 0 14px color-mix(in srgb, var(--slot-color) 44%, transparent), 0 6px 12px rgba(24, 32, 29, 0.2);
+      radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.92) 0 10%, transparent 11%),
+      radial-gradient(circle at 50% 46%, rgba(255, 253, 244, 0.96) 0 42%, color-mix(in srgb, var(--slot-color) 18%, #fff4cf) 43% 66%, color-mix(in srgb, var(--slot-color) 44%, #6f4b22) 67% 100%);
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.58), inset 0 -5px 10px rgba(40, 28, 12, 0.12), 0 3px 9px rgba(24, 32, 29, 0.18);
     transform: translate(-50%, -50%);
     overflow: visible;
   }
@@ -1119,27 +1254,27 @@ dialog h2 {
   .slot::before {
     display: block;
     inset: 5px;
-    border: 1px solid rgba(255, 253, 247, 0.72);
+    border: 1px solid rgba(255, 253, 247, 0.78);
     border-radius: 50%;
     opacity: 0.9;
   }
 
-  .slot-fire { left: 50%; top: 15%; }
-  .slot-earth { left: 21%; top: 43%; }
-  .slot-metal { left: 79%; top: 43%; }
+  .slot-fire { left: 50%; top: 14%; }
+  .slot-earth { left: 23%; top: 41%; }
+  .slot-metal { left: 77%; top: 41%; }
   .slot-water { left: 32%; top: 78%; }
   .slot-wood { left: 68%; top: 78%; }
   .slot-core {
     left: 50%;
-    top: 51%;
-    width: clamp(50px, 15.5vw, 58px);
-    height: clamp(50px, 15.5vw, 58px);
+    top: 50%;
+    width: clamp(50px, 15vw, 56px);
+    height: clamp(50px, 15vw, 56px);
     border-radius: 50%;
     z-index: 2;
     background:
-      radial-gradient(circle at 50% 44%, rgba(255, 248, 214, 0.98) 0 34%, rgba(190, 145, 55, 0.3) 35% 50%, transparent 51%),
-      conic-gradient(from 0deg, #f0ca69, transparent 14%, transparent 28%, #fff5bd 35%, transparent 48%, #d99f38 64%, transparent 78%, #fff1a6);
-    box-shadow: 0 0 0 4px rgba(255, 253, 247, 0.3), 0 0 18px rgba(214, 165, 60, 0.5), 0 6px 12px rgba(24, 32, 29, 0.2);
+      radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.94) 0 12%, transparent 13%),
+      radial-gradient(circle at 50% 46%, rgba(255, 248, 214, 0.98) 0 44%, rgba(213, 158, 54, 0.34) 45% 68%, #b77a28 69% 100%);
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.58), inset 0 -5px 10px rgba(84, 50, 7, 0.16), 0 0 14px rgba(214, 165, 60, 0.32), 0 3px 9px rgba(24, 32, 29, 0.18);
   }
 
   .slot.selected {
@@ -1163,18 +1298,18 @@ dialog h2 {
   .slot-header span:first-child {
     position: absolute;
     left: 50%;
-    top: -10px;
+    top: -9px;
     display: grid;
     place-items: center;
     width: 23px;
     height: 23px;
     max-width: none;
     padding: 0;
-    border: 1px solid color-mix(in srgb, var(--slot-color) 62%, #fffdf7);
+    border: 1px solid color-mix(in srgb, var(--slot-color) 54%, #fffdf7);
     border-radius: 50%;
     background:
       radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.92) 0 16%, rgba(255, 255, 255, 0.42) 17% 28%, transparent 29%),
-      radial-gradient(circle at 58% 68%, color-mix(in srgb, var(--slot-color) 74%, #111) 0 42%, var(--slot-color) 43% 100%);
+      radial-gradient(circle at 58% 68%, color-mix(in srgb, var(--slot-color) 64%, #2d2114) 0 42%, var(--slot-color) 43% 100%);
     color: #fffdf7;
     font-size: 11px;
     font-weight: 900;
@@ -1186,7 +1321,7 @@ dialog h2 {
 
   .slot-type {
     position: absolute;
-    right: 1px;
+    right: 0;
     top: auto;
     bottom: 2px;
     min-width: 16px;
@@ -1195,7 +1330,7 @@ dialog h2 {
     margin-left: 0;
     border-radius: 50%;
     border: 1px solid rgba(255, 253, 247, 0.76);
-    background: color-mix(in srgb, var(--slot-color) 78%, #151b19);
+    background: color-mix(in srgb, var(--slot-color) 66%, #211712);
     color: #fffdf7;
     font-size: 10px;
     box-shadow: 0 2px 6px rgba(24, 32, 29, 0.26);
@@ -1244,16 +1379,16 @@ dialog h2 {
   }
 
   .detail-button {
-    left: 42%;
+    left: 50%;
     right: auto;
     bottom: -13px;
-    width: 42px;
+    width: 44px;
     height: 16px;
     border-color: rgba(255, 253, 247, 0.72);
     border-radius: 999px;
-    background: rgba(18, 26, 22, 0.92);
+    background: rgba(38, 32, 21, 0.88);
     color: #fffdf7;
-    font-size: 8.5px;
+    font-size: 8px;
     line-height: 1;
     transform: translateX(-50%);
     box-shadow: 0 2px 8px rgba(24, 32, 29, 0.28);

@@ -20,7 +20,6 @@ const AI_CONFIG_KEY = "arrayDuelAiConfig";
 const DEFAULT_AI_CONFIG = {
   enabled: true,
   baseUrl: "./ai-proxy.php",
-  apiKey: "",
   model: "gpt-5.5",
 };
 
@@ -103,6 +102,8 @@ const state = {
   enemy: createSide("对手"),
 };
 
+let gameStarted = false;
+
 const logState = {
   queue: [],
   busy: false,
@@ -151,6 +152,7 @@ function drawEye() {
 }
 
 function setup() {
+  resetState();
   for (const sideKey of ["player", "enemy"]) {
     const side = state[sideKey];
     for (const element of FIVE) drawIntoSlot(side, sideKey, element);
@@ -159,6 +161,25 @@ function setup() {
   }
   log("战局展开。双方填满六槽，并各自获得 5 张手卡。");
   startTurn("player");
+}
+
+function resetState() {
+  state.round = 1;
+  state.active = "player";
+  state.phase = "prepare";
+  state.selected = null;
+  state.selectedHand = null;
+  state.hasActed = false;
+  state.hasImbued = false;
+  state.winner = null;
+  state.player = createSide("玩家");
+  state.enemy = createSide("对手");
+  aiState.failedThisTurn = false;
+  logState.queue = [];
+  logState.busy = false;
+  logState.waiters.splice(0).forEach((resolve) => resolve());
+  const logNode = document.querySelector("#log");
+  if (logNode) logNode.innerHTML = "";
 }
 
 function randomFive() {
@@ -879,7 +900,6 @@ async function chooseEnemyActionByModel(decision, actions) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
       },
       body: JSON.stringify({
         model: config.model,
@@ -923,14 +943,20 @@ function normalizeChatEndpoint(baseUrl) {
 
 function getAiConfig() {
   try {
-    return { ...DEFAULT_AI_CONFIG, ...JSON.parse(localStorage.getItem(AI_CONFIG_KEY) || "{}") };
+    const saved = JSON.parse(localStorage.getItem(AI_CONFIG_KEY) || "{}");
+    if ("apiKey" in saved) {
+      delete saved.apiKey;
+      localStorage.setItem(AI_CONFIG_KEY, JSON.stringify(saved));
+    }
+    return { ...DEFAULT_AI_CONFIG, ...saved };
   } catch {
     return { ...DEFAULT_AI_CONFIG };
   }
 }
 
 function saveAiConfig(config) {
-  localStorage.setItem(AI_CONFIG_KEY, JSON.stringify(config));
+  const { apiKey, ...safeConfig } = config;
+  localStorage.setItem(AI_CONFIG_KEY, JSON.stringify(safeConfig));
 }
 
 function buildAiSystemPrompt() {
@@ -1275,6 +1301,7 @@ function showCardDetail(slotState, owner, slot) {
 }
 
 function render() {
+  if (!gameStarted) return;
   renderBoard("playerBoard", state.player, "player");
   renderBoard("enemyBoard", state.enemy, "enemy");
   renderHand();
@@ -1440,6 +1467,36 @@ document.querySelector("#activateBtn").addEventListener("click", () => activate(
 document.querySelector("#replaceBtn").addEventListener("click", () => placeSelectedHand());
 document.querySelector("#endBtn").addEventListener("click", () => nextPhase());
 
+function initStartScreen() {
+  const startScreen = document.querySelector("#startScreen");
+  const startButton = document.querySelector("#startGameBtn");
+  const startRulesButton = document.querySelector("#startRulesBtn");
+  const startAiButton = document.querySelector("#startAiBtn");
+  const rulesButton = document.querySelector("#rulesBtn");
+  const restartButton = document.querySelector("#restartBtn");
+  const rulesDialog = document.querySelector("#rulesDialog");
+  const aiDialog = document.querySelector("#aiDialog");
+
+  const beginGame = () => {
+    gameStarted = true;
+    startScreen?.classList.add("hidden");
+    setup();
+  };
+
+  startButton?.addEventListener("click", beginGame);
+  startRulesButton?.addEventListener("click", () => rulesDialog?.showModal());
+  rulesButton?.addEventListener("click", () => rulesDialog?.showModal());
+  startAiButton?.addEventListener("click", () => {
+    if (window.openAiSettings) window.openAiSettings();
+    else aiDialog?.showModal();
+  });
+  restartButton?.addEventListener("click", () => {
+    if (!gameStarted) return;
+    setup();
+    showToast("新战局已展开。");
+  });
+}
+
 function initAiSettings() {
   const openButton = document.querySelector("#aiSettingsBtn");
   const dialog = document.querySelector("#aiDialog");
@@ -1452,8 +1509,18 @@ function initAiSettings() {
     baseUrl: document.querySelector("#aiBaseUrl"),
     model: document.querySelector("#aiModel"),
     modelPreset: document.querySelector("#aiModelPreset"),
-    apiKey: document.querySelector("#aiApiKey"),
   };
+
+  const openSettings = () => {
+    const config = getAiConfig();
+    fields.enabled.checked = Boolean(config.enabled);
+    fields.baseUrl.value = config.baseUrl || "";
+    fields.model.value = config.model || "";
+    fields.modelPreset.value = [...fields.modelPreset.options].some((option) => option.value === config.model) ? config.model : "";
+    dialog.showModal();
+  };
+
+  window.openAiSettings = openSettings;
 
   const updateButton = () => {
     const config = getAiConfig();
@@ -1461,15 +1528,7 @@ function initAiSettings() {
     openButton.setAttribute("aria-pressed", String(config.enabled));
   };
 
-  openButton.addEventListener("click", () => {
-    const config = getAiConfig();
-    fields.enabled.checked = Boolean(config.enabled);
-    fields.baseUrl.value = config.baseUrl || "";
-    fields.model.value = config.model || "";
-    fields.modelPreset.value = [...fields.modelPreset.options].some((option) => option.value === config.model) ? config.model : "";
-    fields.apiKey.value = config.apiKey || "";
-    dialog.showModal();
-  });
+  openButton.addEventListener("click", openSettings);
 
   fields.modelPreset?.addEventListener("change", () => {
     if (fields.modelPreset.value) fields.model.value = fields.modelPreset.value;
@@ -1481,7 +1540,6 @@ function initAiSettings() {
       enabled: fields.enabled.checked,
       baseUrl: fields.baseUrl.value.trim(),
       model: fields.model.value.trim(),
-      apiKey: fields.apiKey.value.trim(),
     });
     updateButton();
     dialog.close();
@@ -1529,5 +1587,6 @@ function initMusic() {
 }
 
 initAiSettings();
+initStartScreen();
 initMusic();
-setup();
+render();
