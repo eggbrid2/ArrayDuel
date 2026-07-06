@@ -74,9 +74,18 @@ button:disabled {
 
 .start-panel {
   display: grid;
-  justify-items: center;
-  gap: 22px;
-  width: min(460px, 100%);
+  grid-template-columns: minmax(260px, 320px) minmax(280px, 360px);
+  align-items: center;
+  gap: 34px;
+  width: min(780px, 100%);
+  padding: 28px;
+  border: 1px solid rgba(255, 253, 247, 0.14);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 28% 28%, rgba(229, 197, 116, 0.1), transparent 16rem),
+    rgba(255, 253, 247, 0.055);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .start-array {
@@ -131,11 +140,24 @@ button:disabled {
 }
 
 .start-copy {
-  text-align: center;
+  text-align: left;
+}
+
+.start-state {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 5px 9px;
+  border: 1px solid rgba(229, 197, 116, 0.38);
+  border-radius: 999px;
+  background: rgba(229, 197, 116, 0.12);
+  color: #e5c574;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .start-kicker {
   display: inline-flex;
+  width: 100%;
   margin-bottom: 8px;
   color: rgba(255, 253, 247, 0.62);
   font-size: 13px;
@@ -153,7 +175,7 @@ button:disabled {
 
 .start-copy p {
   max-width: 390px;
-  margin: 12px auto 0;
+  margin: 12px 0 0;
   color: rgba(255, 253, 247, 0.72);
   font-size: 15px;
   line-height: 1.6;
@@ -163,6 +185,7 @@ button:disabled {
   display: grid;
   gap: 10px;
   width: min(320px, 100%);
+  justify-self: start;
 }
 
 .primary-action,
@@ -1092,6 +1115,46 @@ dialog h2 {
     background:
       radial-gradient(circle at 50% 8%, rgba(247, 243, 232, 0.1), transparent 20rem),
       linear-gradient(180deg, #101413, #151d1a 46%, #101419);
+  }
+
+  .start-screen {
+    padding: calc(18px + var(--safe-top)) 14px calc(18px + var(--safe-bottom));
+  }
+
+  .start-panel {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 18px;
+    width: min(390px, 100%);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .start-array {
+    width: min(72vw, 278px);
+  }
+
+  .start-copy {
+    text-align: center;
+  }
+
+  .start-state {
+    margin-bottom: 10px;
+  }
+
+  .start-kicker {
+    justify-content: center;
+  }
+
+  .start-copy p {
+    margin: 10px auto 0;
+  }
+
+  .start-actions {
+    justify-self: center;
   }
 
   .app-shell {
