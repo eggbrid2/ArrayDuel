@@ -1482,6 +1482,8 @@ function initStartScreen() {
     gameStarted = true;
     if (startScreen) startScreen.hidden = true;
     if (gameShell) gameShell.hidden = false;
+    document.body.classList.remove("start-mode");
+    document.body.classList.add("game-mode");
     setup();
   };
 
