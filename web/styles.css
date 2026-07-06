@@ -51,25 +51,20 @@ button:disabled {
   opacity: 0.45;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .start-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
   display: grid;
   place-items: center;
+  min-height: 100svh;
   padding: calc(22px + var(--safe-top)) 18px calc(22px + var(--safe-bottom));
   background:
     radial-gradient(circle at 50% 34%, rgba(229, 197, 116, 0.16), transparent 18rem),
     radial-gradient(circle at 20% 78%, rgba(50, 122, 161, 0.15), transparent 18rem),
     linear-gradient(145deg, #0d1210, #172018 52%, #0b1216);
   color: #fffdf7;
-  transition: opacity 220ms ease, visibility 220ms ease;
-}
-
-.start-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
 }
 
 .start-panel {

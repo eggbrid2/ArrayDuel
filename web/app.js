@@ -1469,6 +1469,7 @@ document.querySelector("#endBtn").addEventListener("click", () => nextPhase());
 
 function initStartScreen() {
   const startScreen = document.querySelector("#startScreen");
+  const gameShell = document.querySelector("#gameShell");
   const startButton = document.querySelector("#startGameBtn");
   const startRulesButton = document.querySelector("#startRulesBtn");
   const startAiButton = document.querySelector("#startAiBtn");
@@ -1479,7 +1480,8 @@ function initStartScreen() {
 
   const beginGame = () => {
     gameStarted = true;
-    startScreen?.classList.add("hidden");
+    if (startScreen) startScreen.hidden = true;
+    if (gameShell) gameShell.hidden = false;
     setup();
   };
 
