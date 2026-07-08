@@ -2231,6 +2231,89 @@ dialog h2::before {
   padding-right: 2px;
 }
 
+.deck-status {
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid rgba(229, 197, 116, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.08);
+  color: rgba(255, 253, 247, 0.86);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.deck-status.valid {
+  border-color: rgba(123, 191, 140, 0.58);
+  color: #dff7dc;
+}
+
+.deck-status.invalid {
+  border-color: rgba(218, 95, 73, 0.62);
+  color: #ffd6cb;
+}
+
+.deck-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.deck-filters button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(229, 197, 116, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.08);
+  color: rgba(255, 253, 247, 0.78);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.deck-filters button.active {
+  border-color: rgba(247, 213, 108, 0.72);
+  background: linear-gradient(180deg, #ffe69d, #b98535);
+  color: #17140c;
+}
+
+.deck-builder {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 10px;
+  min-height: 0;
+}
+
+.deck-pane {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.deck-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: rgba(255, 253, 247, 0.82);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.deck-pane-head span {
+  color: rgba(255, 253, 247, 0.58);
+  font-size: 12px;
+}
+
+.deck-card-list {
+  grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
+  max-height: min(42svh, 380px);
+  padding: 2px;
+  border: 1px solid rgba(229, 197, 116, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.05);
+}
+
 .collection-card {
   position: relative;
   display: grid;
@@ -2243,6 +2326,32 @@ dialog h2::before {
     linear-gradient(180deg, rgba(255, 253, 247, 0.9), rgba(231, 224, 205, 0.9));
   color: #1a1d18;
   overflow: hidden;
+}
+
+.collection-card button {
+  position: relative;
+  z-index: 2;
+  align-self: end;
+  min-height: 30px;
+  border: 1px solid rgba(53, 37, 19, 0.22);
+  border-radius: 7px;
+  background: rgba(24, 32, 29, 0.86);
+  color: #fffdf7;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.collection-card button:disabled {
+  opacity: 0.48;
+}
+
+.collection-card .card-count-note {
+  position: relative;
+  z-index: 1;
+  color: rgba(24, 32, 29, 0.62);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
 }
 
 .collection-card span,
@@ -3811,6 +3920,20 @@ dialog h2::before {
   .target-list button,
   .secondary {
     min-height: 46px;
+  }
+
+  .deck-builder {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-card-list {
+    max-height: 260px;
+  }
+
+  .deck-filters button {
+    min-height: 30px;
+    padding: 0 8px;
+    font-size: 11px;
   }
 
   .board {

@@ -16,6 +16,12 @@ $dataDir = __DIR__ . '/data';
 $usersFile = $dataDir . '/users.json';
 $invitesFile = $dataDir . '/invite-codes.json';
 $profilesFile = $dataDir . '/player-data.json';
+const DECK_MIN = 30;
+const DECK_MAX = 50;
+const DECK_MAX_COPIES = 3;
+const DECK_MIN_EYE = 1;
+const DECK_MIN_PER_ELEMENT = 3;
+const DECK_ELEMENTS = ['wood', 'fire', 'earth', 'metal', 'water'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
@@ -82,6 +88,22 @@ if ($action === 'buyBooster') {
     $profiles[$userId] = $profile;
     writeProfiles($profilesFile, $profiles);
     echo json_encode(['profile' => publicPlayerProfile($profile), 'cards' => $cards], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($action === 'saveDeck') {
+    $userId = currentUserIdRaw($usersFile);
+    if ($userId === '') fail(401, '需要先登录');
+    $profiles = readProfiles($profilesFile);
+    $profile = ensurePlayerProfile($profiles, $userId, $payload);
+    $deck = normalizeCountMap($payload['deck'] ?? []);
+    $issues = validateDeck($deck, is_array($profile['collection'] ?? null) ? $profile['collection'] : []);
+    if ($issues) fail(422, implode('；', $issues));
+    $profile['deck'] = $deck;
+    $profile['updatedAt'] = gmdate('c');
+    $profiles[$userId] = $profile;
+    writeProfiles($profilesFile, $profiles);
+    echo json_encode(['profile' => publicPlayerProfile($profile)], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -277,6 +299,13 @@ function ensurePlayerProfile(array &$profiles, string $userId, array $payload): 
         $profile['createdAt'] = (string)($profile['createdAt'] ?? gmdate('c'));
         $changed = true;
     }
+    if (!isset($profile['deck']) || !is_array($profile['deck']) || count($profile['deck']) === 0) {
+        $defaultDeck = normalizeCountMap($payload['defaultDeck'] ?? []);
+        $collection = is_array($profile['collection'] ?? null) ? $profile['collection'] : [];
+        $issues = validateDeck($defaultDeck, $collection);
+        $profile['deck'] = $issues ? buildFallbackDeck($collection) : $defaultDeck;
+        $changed = true;
+    }
     if ($changed) {
         $profile['updatedAt'] = gmdate('c');
         $profiles[$userId] = $profile;
@@ -293,6 +322,58 @@ function playerCardKey($card): string
     return $element . ':' . limitText($name, 40);
 }
 
+function normalizeCountMap($map): array
+{
+    if (!is_array($map)) return [];
+    $normalized = [];
+    foreach ($map as $key => $count) {
+        $safeKey = trim((string)$key);
+        if (!preg_match('/^[a-z]+:.+$/', $safeKey)) continue;
+        $amount = max(0, (int)$count);
+        if ($amount > 0) $normalized[$safeKey] = $amount;
+    }
+    return $normalized;
+}
+
+function validateDeck(array $deck, array $collection): array
+{
+    $issues = [];
+    $total = array_sum(array_map('intval', $deck));
+    if ($total < DECK_MIN) $issues[] = '卡组至少 ' . DECK_MIN . ' 张';
+    if ($total > DECK_MAX) $issues[] = '卡组最多 ' . DECK_MAX . ' 张';
+    $eyeCount = 0;
+    $elementCounts = array_fill_keys(DECK_ELEMENTS, 0);
+    foreach ($deck as $key => $count) {
+        $amount = (int)$count;
+        $owned = (int)($collection[$key] ?? 0);
+        if ($owned <= 0) $issues[] = '包含未拥有卡牌';
+        if ($amount > $owned) $issues[] = '卡组数量超过收藏';
+        if ($amount > DECK_MAX_COPIES) $issues[] = '同名最多 ' . DECK_MAX_COPIES . ' 张';
+        [$element, $name] = explode(':', (string)$key, 2);
+        if (in_array($element, DECK_ELEMENTS, true)) $elementCounts[$element] += $amount;
+        if (strpos($name, '玄门') !== false || strpos($name, '朝元') !== false || strpos($name, '剑台') !== false || strpos($name, '灵坛') !== false || strpos($name, '水府') !== false) {
+            $eyeCount += $amount;
+        }
+    }
+    if ($eyeCount < DECK_MIN_EYE) $issues[] = '阵眼至少 ' . DECK_MIN_EYE . ' 张';
+    foreach (DECK_ELEMENTS as $element) {
+        if (($elementCounts[$element] ?? 0) < DECK_MIN_PER_ELEMENT) {
+            $issues[] = $element . ' 系至少 ' . DECK_MIN_PER_ELEMENT . ' 张';
+        }
+    }
+    return array_values(array_unique($issues));
+}
+
+function buildFallbackDeck(array $collection): array
+{
+    $deck = [];
+    foreach ($collection as $key => $count) {
+        if (array_sum($deck) >= DECK_MIN) break;
+        $deck[$key] = min((int)$count, DECK_MAX_COPIES, DECK_MIN - array_sum($deck));
+    }
+    return $deck;
+}
+
 function publicPlayerProfile(array $profile): array
 {
     return [
@@ -300,6 +381,7 @@ function publicPlayerProfile(array $profile): array
         'wins' => max(0, (int)($profile['wins'] ?? 0)),
         'packsOpened' => max(0, (int)($profile['packsOpened'] ?? 0)),
         'collection' => is_array($profile['collection'] ?? null) ? $profile['collection'] : [],
+        'deck' => is_array($profile['deck'] ?? null) ? $profile['deck'] : [],
         'updatedAt' => (string)($profile['updatedAt'] ?? ''),
     ];
 }

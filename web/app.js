@@ -168,6 +168,13 @@ const DEFAULT_AI_CONFIG = {
 const AUTH_ENDPOINT = "./auth.php";
 const VICTORY_MESSAGES_ENDPOINT = "./victory-messages.php";
 const PLAYER_DATA_ENDPOINT = "./auth.php";
+const DECK_RULES = {
+  min: 30,
+  max: 50,
+  maxCopies: 3,
+  minEye: 1,
+  minPerElement: 3,
+};
 const DEFEAT_TAUNTS = [
   "你这阵法松得像没结印，连我的起手式都没逼出来。",
   "六个槽位摆成这样，五行看了都想改名。",
@@ -321,6 +328,18 @@ function collectibleKey(card) {
   return `${card.element || "core"}:${card.name}`;
 }
 
+function initialDeckMap() {
+  return cardsToCountMap(initialCollectionCards());
+}
+
+function cardsToCountMap(cards) {
+  return cards.reduce((map, card) => {
+    const key = collectibleKey(card);
+    map[key] = (map[key] || 0) + 1;
+    return map;
+  }, {});
+}
+
 function cardByKey(key) {
   const catalog = allCollectibleCards();
   return catalog.find((card) => collectibleKey(card) === key) || null;
@@ -329,6 +348,53 @@ function cardByKey(key) {
 function drawBoosterCards(count = 5) {
   const catalog = allCollectibleCards();
   return Array.from({ length: count }, () => catalog[Math.floor(Math.random() * catalog.length)]);
+}
+
+function countMapTotal(map = {}) {
+  return Object.values(map).reduce((sum, count) => sum + Number(count || 0), 0);
+}
+
+function expandCardMap(map = {}) {
+  const cards = [];
+  Object.entries(map).forEach(([key, count]) => {
+    const card = cardByKey(key);
+    if (!card) return;
+    for (let i = 0; i < Number(count || 0); i += 1) cards.push(plainCard(card, card.element));
+  });
+  return cards;
+}
+
+function shuffled(cards) {
+  const copy = [...cards];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function deckIssues(deck = {}) {
+  const total = countMapTotal(deck);
+  const issues = [];
+  if (total < DECK_RULES.min) issues.push(`至少 ${DECK_RULES.min} 张`);
+  if (total > DECK_RULES.max) issues.push(`最多 ${DECK_RULES.max} 张`);
+  const eyeCount = Object.entries(deck).reduce((sum, [key, count]) => {
+    const card = cardByKey(key);
+    return sum + (card?.type === "eye" ? Number(count || 0) : 0);
+  }, 0);
+  if (eyeCount < DECK_RULES.minEye) issues.push(`阵眼至少 ${DECK_RULES.minEye} 张`);
+  FIVE.forEach((element) => {
+    const amount = Object.entries(deck).reduce((sum, [key, count]) => {
+      const card = cardByKey(key);
+      return sum + (card?.element === element ? Number(count || 0) : 0);
+    }, 0);
+    if (amount < DECK_RULES.minPerElement) issues.push(`${LABEL[element]}系至少 ${DECK_RULES.minPerElement} 张`);
+  });
+  return issues;
+}
+
+function isDeckValid(deck = {}) {
+  return deckIssues(deck).length === 0;
 }
 
 const state = {
@@ -374,6 +440,11 @@ const authState = {
 const playerDataState = {
   profile: null,
   loading: false,
+  deckDraft: {},
+  deckFilters: {
+    element: "all",
+    type: "all",
+  },
 };
 
 function createSide(name) {
@@ -383,6 +454,7 @@ function createSide(name) {
     stones: 0,
     hand: [],
     discard: [],
+    drawPile: [],
     tempAttackBoost: 0,
     tideSurged: false,
     board: Object.fromEntries(ELEMENTS.map((slot) => [slot, null])),
@@ -416,6 +488,32 @@ function drawEye() {
   return cloneCard(eyePool[Math.floor(Math.random() * eyePool.length)], "core");
 }
 
+function preparePlayerDeck() {
+  const deck = playerDataState.profile?.deck && isDeckValid(playerDataState.profile.deck)
+    ? playerDataState.profile.deck
+    : null;
+  state.player.drawPile = deck ? shuffled(expandCardMap(deck)) : [];
+}
+
+function drawFromPlayerDeck(predicate = () => true) {
+  if (!state.player.drawPile.length) return null;
+  const index = state.player.drawPile.findIndex(predicate);
+  if (index < 0) return null;
+  const [card] = state.player.drawPile.splice(index, 1);
+  return cloneCard(card, card.element || "core");
+}
+
+function drawSideCard(side, element = randomFive()) {
+  if (side === state.player && state.player.drawPile.length) {
+    const deckCard = drawFromPlayerDeck((card) => {
+      if (element === "core") return true;
+      return card.element === element && card.type !== "eye";
+    });
+    if (deckCard) return deckCard;
+  }
+  return drawCard(element === "core" ? randomFive() : element);
+}
+
 function cardArtKey(card) {
   return `${card.element || "core"}:${card.name}`;
 }
@@ -442,6 +540,7 @@ async function loadCardArtManifest() {
 function setup() {
   resetState();
   state.tutorial = null;
+  preparePlayerDeck();
   for (const sideKey of ["player", "enemy"]) {
     const side = state[sideKey];
     for (const element of FIVE) drawIntoSlot(side, sideKey, element);
@@ -762,6 +861,10 @@ function placePrompt(card, targets) {
 }
 
 function drawFillCard(side, slot) {
+  if (side === state.player && state.player.drawPile.length) {
+    const deckCard = drawFromPlayerDeck((card) => canPlaceCardAt(side, card, slot));
+    if (deckCard) return deckCard;
+  }
   if (slot === "core" && Math.random() < 0.25) return drawEye();
   const element = slot === "core" ? randomFive() : slot;
   for (let i = 0; i < 24; i += 1) {
@@ -778,7 +881,7 @@ function drawIntoSlot(side, sideKey, slot) {
 }
 
 function drawToHand(side) {
-  side.hand.push(drawCard(randomFive()));
+  side.hand.push(drawSideCard(side, randomFive()));
 }
 
 function hasOngoing(side, namePart) {
@@ -826,7 +929,7 @@ function boostSlotIfPresent(side, slot, amount = 1) {
 }
 
 function drawElementToHand(side, element, reason = "") {
-  side.hand.push(drawCard(element));
+  side.hand.push(drawSideCard(side, element));
   if (element === "water" && hasOngoing(side, "玄冥续潮") && !side.tideSurged) {
     side.tideSurged = true;
     drawToHand(side);
@@ -4332,8 +4435,8 @@ function renderPlayerDataState() {
   const profile = playerDataState.profile;
   if (deckSummary) {
     deckSummary.textContent = profile
-      ? `收藏 ${collectionCount(profile)} 张 · 胜场 ${profile.wins || 0} · 灵石 ${profile.stones || 0}`
-      : "登录后可查看初始卡组。";
+      ? `收藏 ${collectionCount(profile)} 张 · 卡组 ${countMapTotal(profile.deck || {})} 张 · 灵石 ${profile.stones || 0}`
+      : "登录后可整理卡组。";
   }
   if (shopSummary) {
     shopSummary.textContent = profile
@@ -4350,6 +4453,7 @@ async function requestPlayerData(action = "playerStatus", payload = {}) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       initialCards: initialCollectionCards(),
+      defaultDeck: initialDeckMap(),
       ...payload,
     }),
     cache: "no-store",
@@ -4401,6 +4505,182 @@ function renderCollection(container, collection) {
   });
 }
 
+function currentDeckDraft() {
+  if (!playerDataState.deckDraft || Object.keys(playerDataState.deckDraft).length === 0) {
+    playerDataState.deckDraft = { ...(playerDataState.profile?.deck || initialDeckMap()) };
+  }
+  return playerDataState.deckDraft;
+}
+
+function cardMatchesDeckFilters(card) {
+  const { element, type } = playerDataState.deckFilters;
+  const elementOk = element === "all" || card.element === element || (element === "core" && card.type === "eye");
+  const typeOk = type === "all"
+    || card.type === type
+    || (type === "defense" && ["defense", "counter"].includes(card.type));
+  return elementOk && typeOk;
+}
+
+function deckRuleText(deck) {
+  const issues = deckIssues(deck);
+  const total = countMapTotal(deck);
+  if (!issues.length) return `卡组 ${total}/${DECK_RULES.max}，规则合法。`;
+  return `卡组 ${total}/${DECK_RULES.max}，${issues.join("；")}。`;
+}
+
+function renderDeckBuilder() {
+  const profile = playerDataState.profile;
+  const collection = profile?.collection || {};
+  const deck = currentDeckDraft();
+  const deckStatus = document.querySelector("#deckStatus");
+  const deckSummary = document.querySelector("#deckSummary");
+  const collectionSummary = document.querySelector("#collectionSummary");
+  const deckCountSummary = document.querySelector("#deckCountSummary");
+  const saveButton = document.querySelector("#saveDeck");
+  const total = countMapTotal(deck);
+  const valid = isDeckValid(deck);
+  if (deckSummary) deckSummary.textContent = `收藏 ${collectionCount(profile)} 张 · 当前卡组 ${total} 张`;
+  if (deckStatus) {
+    deckStatus.textContent = deckRuleText(deck);
+    deckStatus.classList.toggle("valid", valid);
+    deckStatus.classList.toggle("invalid", !valid);
+  }
+  if (collectionSummary) collectionSummary.textContent = `${collectionCount(profile)} 张`;
+  if (deckCountSummary) deckCountSummary.textContent = `${total} 张`;
+  if (saveButton) saveButton.disabled = !valid;
+  renderDeckCollection();
+  renderDeckCards();
+}
+
+function renderDeckCollection() {
+  const root = document.querySelector("#deckCollection");
+  if (!root) return;
+  root.innerHTML = "";
+  const collection = playerDataState.profile?.collection || {};
+  const deck = currentDeckDraft();
+  const cards = Object.entries(collection)
+    .map(([key, count]) => ({ key, count: Number(count || 0), card: cardByKey(key) }))
+    .filter((entry) => entry.card && cardMatchesDeckFilters(entry.card))
+    .sort((a, b) => a.key.localeCompare(b.key, "zh-CN"));
+  if (!cards.length) {
+    root.innerHTML = `<p class="trigger-text">没有符合筛选的卡。</p>`;
+    return;
+  }
+  cards.forEach(({ key, count, card }) => {
+    const inDeck = Number(deck[key] || 0);
+    const canAdd = inDeck < count && inDeck < DECK_RULES.maxCopies && countMapTotal(deck) < DECK_RULES.max;
+    root.append(createDeckCardNode(card, {
+      count,
+      note: `卡组 ${inDeck}/${Math.min(count, DECK_RULES.maxCopies)}`,
+      action: "加入",
+      disabled: !canAdd,
+      onClick: () => addCardToDeck(key),
+    }));
+  });
+}
+
+function renderDeckCards() {
+  const root = document.querySelector("#deckCards");
+  if (!root) return;
+  root.innerHTML = "";
+  const deck = currentDeckDraft();
+  const cards = Object.entries(deck)
+    .map(([key, count]) => ({ key, count: Number(count || 0), card: cardByKey(key) }))
+    .filter((entry) => entry.card && entry.count > 0)
+    .sort((a, b) => a.key.localeCompare(b.key, "zh-CN"));
+  if (!cards.length) {
+    root.innerHTML = `<p class="trigger-text">还没有加入卡牌。</p>`;
+    return;
+  }
+  cards.forEach(({ key, count, card }) => {
+    root.append(createDeckCardNode(card, {
+      count,
+      note: `${LABEL[card.element] || "中"} · ${TYPE[card.type] || "卡"}`,
+      action: "移除",
+      onClick: () => removeCardFromDeck(key),
+    }));
+  });
+}
+
+function createDeckCardNode(card, options) {
+  const art = cardArtUrl(card);
+  const item = document.createElement("article");
+  item.className = "collection-card";
+  item.style.setProperty("--slot-color", COLOR[card.element] || "#e5c574");
+  if (art) item.style.setProperty("--card-art", `url("${art}")`);
+  item.innerHTML = `
+    <span>${LABEL[card.element] || "中"}</span>
+    <strong>${escapeHtml(card.name)}</strong>
+    <em>${TYPE[card.type] || "卡"}${card.value ? ` · 灵力 ${card.value}` : ""}</em>
+    <small class="card-count-note">${escapeHtml(options.note || "")}</small>
+    ${art ? '<i></i>' : ""}
+    <b>x${Number(options.count || 0)}</b>
+  `;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = options.action;
+  button.disabled = Boolean(options.disabled);
+  button.addEventListener("click", options.onClick);
+  item.append(button);
+  return item;
+}
+
+function addCardToDeck(key) {
+  const collectionCountForCard = Number(playerDataState.profile?.collection?.[key] || 0);
+  const deck = currentDeckDraft();
+  const current = Number(deck[key] || 0);
+  if (current >= collectionCountForCard || current >= DECK_RULES.maxCopies || countMapTotal(deck) >= DECK_RULES.max) return;
+  deck[key] = current + 1;
+  renderDeckBuilder();
+}
+
+function removeCardFromDeck(key) {
+  const deck = currentDeckDraft();
+  const current = Number(deck[key] || 0);
+  if (current <= 1) delete deck[key];
+  else deck[key] = current - 1;
+  renderDeckBuilder();
+}
+
+function resetDeckDraft() {
+  const collection = playerDataState.profile?.collection || {};
+  const nextDeck = {};
+  Object.entries(initialDeckMap()).forEach(([key, count]) => {
+    const owned = Number(collection[key] || 0);
+    if (owned > 0) nextDeck[key] = Math.min(Number(count || 0), owned, DECK_RULES.maxCopies);
+  });
+  if (countMapTotal(nextDeck) < DECK_RULES.min) {
+    Object.entries(collection).forEach(([key, count]) => {
+      if (countMapTotal(nextDeck) >= DECK_RULES.min) return;
+      const current = Number(nextDeck[key] || 0);
+      const add = Math.min(Number(count || 0) - current, DECK_RULES.maxCopies - current, DECK_RULES.min - countMapTotal(nextDeck));
+      if (add > 0) nextDeck[key] = current + add;
+    });
+  }
+  playerDataState.deckDraft = nextDeck;
+  renderDeckBuilder();
+}
+
+async function saveDeckDraft() {
+  const deck = currentDeckDraft();
+  if (!isDeckValid(deck)) {
+    showToast(deckRuleText(deck), "log-destroy", "minor");
+    return;
+  }
+  const button = document.querySelector("#saveDeck");
+  if (button) button.disabled = true;
+  try {
+    await requestPlayerData("saveDeck", { deck });
+    playerDataState.deckDraft = { ...(playerDataState.profile?.deck || deck) };
+    renderDeckBuilder();
+    showToast("卡组已保存。", "log-burst");
+  } catch (error) {
+    showToast(error.message || "卡组保存失败。", "log-destroy", "minor");
+  } finally {
+    renderDeckBuilder();
+  }
+}
+
 function renderBoosterResult(cards) {
   const result = document.querySelector("#boosterResult");
   if (!result) return;
@@ -4418,11 +4698,14 @@ function openDeckDialog() {
     return;
   }
   const dialog = document.querySelector("#deckDialog");
-  const collection = document.querySelector("#deckCollection");
-  renderCollection(collection, playerDataState.profile?.collection || {});
+  playerDataState.deckDraft = { ...(playerDataState.profile?.deck || initialDeckMap()) };
   renderPlayerDataState();
+  renderDeckBuilder();
   dialog?.showModal();
-  loadPlayerProfile().then(() => renderCollection(collection, playerDataState.profile?.collection || {})).catch(() => {
+  loadPlayerProfile().then(() => {
+    playerDataState.deckDraft = { ...(playerDataState.profile?.deck || initialDeckMap()) };
+    renderDeckBuilder();
+  }).catch(() => {
     showToast("卡组资产读取失败。", "log-destroy", "minor");
   });
 }
@@ -4753,10 +5036,24 @@ function initResultScreen() {
 }
 
 function initPlayerDataUi() {
+  document.querySelectorAll("[data-deck-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.dataset.deckFilter;
+      const value = button.dataset.value || "all";
+      playerDataState.deckFilters[filter] = value;
+      document.querySelectorAll(`[data-deck-filter="${filter}"]`).forEach((node) => {
+        node.classList.toggle("active", node === button);
+      });
+      renderDeckBuilder();
+    });
+  });
+  document.querySelector("#saveDeck")?.addEventListener("click", saveDeckDraft);
+  document.querySelector("#resetDeck")?.addEventListener("click", resetDeckDraft);
   document.querySelector("#refreshDeck")?.addEventListener("click", async () => {
     try {
       await loadPlayerProfile();
-      renderCollection(document.querySelector("#deckCollection"), playerDataState.profile?.collection || {});
+      playerDataState.deckDraft = { ...(playerDataState.profile?.deck || initialDeckMap()) };
+      renderDeckBuilder();
       showToast("卡组资产已刷新。", "log-phase", "minor");
     } catch {
       showToast("刷新失败。", "log-destroy", "minor");
