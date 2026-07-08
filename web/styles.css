@@ -2008,6 +2008,7 @@ dialog h2::before {
 .field-line input[type="url"],
 .field-line input[type="text"],
 .field-line input[type="password"],
+.field-line textarea,
 .field-line select {
   width: 100%;
   min-height: 42px;
@@ -2018,6 +2019,12 @@ dialog h2::before {
   padding: 9px 10px;
   font: inherit;
   font-weight: 650;
+}
+
+.field-line textarea {
+  min-height: 104px;
+  resize: vertical;
+  line-height: 1.45;
 }
 
 .field-line input[type="checkbox"] {
@@ -2099,6 +2106,142 @@ dialog h2::before {
   align-items: center;
   margin-right: 8px;
   color: #f7d56c;
+}
+
+.result-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: calc(20px + var(--safe-top)) 18px calc(22px + var(--safe-bottom));
+  background:
+    radial-gradient(circle at 50% 14%, rgba(247, 213, 108, 0.2), transparent 17rem),
+    radial-gradient(circle at 18% 78%, rgba(50, 122, 161, 0.18), transparent 18rem),
+    rgba(4, 7, 7, 0.86);
+  color: #fffdf7;
+  backdrop-filter: blur(7px);
+}
+
+.result-panel {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  width: min(560px, 100%);
+  max-height: calc(100svh - 44px - var(--safe-top) - var(--safe-bottom));
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid rgba(229, 197, 116, 0.38);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(229, 197, 116, 0.18), transparent 12rem),
+    linear-gradient(155deg, rgba(20, 27, 23, 0.98), rgba(8, 13, 12, 0.98));
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.58), inset 0 0 0 1px rgba(255, 253, 247, 0.06);
+  text-align: center;
+}
+
+.result-kicker {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid rgba(229, 197, 116, 0.42);
+  border-radius: 999px;
+  color: #f7d56c;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.result-panel h2 {
+  margin: 0;
+  color: #fff0b5;
+  font-size: 42px;
+  line-height: 1.08;
+  letter-spacing: 0;
+  text-shadow: 0 0 22px rgba(247, 213, 108, 0.28);
+}
+
+.result-copy,
+.defeat-taunt {
+  max-width: 420px;
+  margin: 0;
+  color: rgba(255, 253, 247, 0.78);
+  line-height: 1.55;
+}
+
+.victory-form,
+.victory-messages {
+  display: grid;
+  gap: 11px;
+  width: min(420px, 100%);
+  text-align: left;
+}
+
+.victory-form .primary-action,
+.result-panel > .secondary-action,
+.result-panel > .primary-action {
+  width: 100%;
+}
+
+.result-list-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  color: #f7d56c;
+}
+
+.result-list-head .secondary-action {
+  width: auto;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.message-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.message-list li {
+  display: grid;
+  gap: 5px;
+  padding: 10px 11px;
+  border: 1px solid rgba(229, 197, 116, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.07);
+}
+
+.message-list strong {
+  color: #fff0b5;
+  font-size: 14px;
+}
+
+.message-list p {
+  margin: 0;
+  color: rgba(255, 253, 247, 0.78);
+  line-height: 1.45;
+}
+
+.message-list time {
+  color: rgba(255, 253, 247, 0.46);
+  font-size: 12px;
+}
+
+.result-ai-avatar {
+  width: 104px;
+  height: 104px;
+  border: 1px solid rgba(229, 197, 116, 0.42);
+  border-radius: 50%;
+  background:
+    linear-gradient(180deg, rgba(4, 8, 7, 0), rgba(4, 8, 7, 0.34)),
+    url("./assets/ui/ai-avatar.jpg") center / cover no-repeat,
+    linear-gradient(145deg, #26362f, #0f1916 66%);
+  box-shadow: inset 0 2px 12px rgba(255, 255, 255, 0.15), 0 14px 34px rgba(0, 0, 0, 0.34);
 }
 
 @keyframes dialogSheen {

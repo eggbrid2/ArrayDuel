@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=130" />
+    <link rel="stylesheet" href="./styles.css?v=131" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -253,6 +253,41 @@
       </section>
     </main>
 
+    <section id="resultScreen" class="result-screen" hidden aria-live="polite">
+      <div class="result-panel result-victory" id="victoryResult" hidden>
+        <span class="result-kicker">Victory</span>
+        <h2>阵成破敌</h2>
+        <p class="result-copy">你赢下了这一局。留一句话刻进胜者碑，后来的玩家会在这里看到。</p>
+        <form id="victoryMessageForm" class="victory-form">
+          <label class="field-line">
+            <span>昵称</span>
+            <input id="victoryName" type="text" maxlength="18" autocomplete="nickname" placeholder="无名阵师" />
+          </label>
+          <label class="field-line">
+            <span>获胜留言</span>
+            <textarea id="victoryMessage" maxlength="120" rows="4" placeholder="这一局，我以五行收官。"></textarea>
+          </label>
+          <button id="saveVictoryMessage" class="primary-action" type="submit">刻入胜者碑</button>
+        </form>
+        <div id="victoryMessagesPanel" class="victory-messages" hidden>
+          <div class="result-list-head">
+            <strong>玩家留言</strong>
+            <button id="refreshVictoryMessages" class="secondary-action" type="button">刷新</button>
+          </div>
+          <ol id="victoryMessages" class="message-list"></ol>
+        </div>
+        <button id="victoryRestart" class="secondary-action" type="button">再开一局</button>
+      </div>
+
+      <div class="result-panel result-defeat" id="defeatResult" hidden>
+        <span class="result-kicker">Defeat</span>
+        <div class="result-ai-avatar" aria-hidden="true"></div>
+        <h2>阵破身退</h2>
+        <p id="defeatTaunt" class="defeat-taunt">你这阵法松得像没结印，连我的起手式都没逼出来。</p>
+        <button id="defeatRestart" class="primary-action" type="button">重整阵盘</button>
+      </div>
+    </section>
+
     <dialog id="targetDialog">
       <form method="dialog">
         <h2>选择目标</h2>
@@ -339,11 +374,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=130"></script>
+    <script src="./app.js?v=131"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=130").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=131").catch(() => {});
         });
       }
     </script>

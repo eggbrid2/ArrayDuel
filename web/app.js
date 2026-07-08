@@ -165,6 +165,14 @@ const DEFAULT_AI_CONFIG = {
   baseUrl: "./ai-proxy.php",
   model: "gpt-5.5",
 };
+const VICTORY_MESSAGES_ENDPOINT = "./victory-messages.php";
+const DEFEAT_TAUNTS = [
+  "你这阵法松得像没结印，连我的起手式都没逼出来。",
+  "六个槽位摆成这样，五行看了都想改名。",
+  "我本来还在推演，结果你先把自己推没了。",
+  "这不是斗阵，是把胜利双手奉上还附赠灵石。",
+  "下次记得先看克制关系，再来挑战我的耐心。",
+];
 const CARD_ART = {};
 
 const cardPool = {
@@ -298,6 +306,7 @@ const state = {
   pendingTutorialTarget: null,
   tutorial: null,
   winner: null,
+  resultShown: false,
   player: createSide("玩家"),
   enemy: createSide("对手"),
 };
@@ -445,8 +454,10 @@ function resetState() {
   state.pendingTutorialTarget = null;
   state.tutorial = null;
   state.winner = null;
+  state.resultShown = false;
   state.player = createSide("玩家");
   state.enemy = createSide("对手");
+  hideResultScreen();
   aiState.failedThisTurn = false;
   logState.queue = [];
   logState.busy = false;
@@ -3420,9 +3431,43 @@ function findMove(side, opponent, type) {
 }
 
 function checkWinner() {
-  if (state.player.hp <= 0) state.winner = "对手";
+  if (state.winner) return;
   if (state.enemy.hp <= 0) state.winner = "玩家";
-  if (state.winner) log(`${state.winner}获胜。`);
+  else if (state.player.hp <= 0) state.winner = "对手";
+  if (state.winner) {
+    log(`${state.winner}获胜。`);
+    showResultScreen(state.winner === "玩家" ? "victory" : "defeat");
+  }
+}
+
+function showResultScreen(result) {
+  if (state.resultShown) return;
+  state.resultShown = true;
+  const screen = document.querySelector("#resultScreen");
+  const victory = document.querySelector("#victoryResult");
+  const defeat = document.querySelector("#defeatResult");
+  if (!screen || !victory || !defeat) return;
+  screen.hidden = false;
+  victory.hidden = result !== "victory";
+  defeat.hidden = result !== "defeat";
+  if (result === "defeat") {
+    const taunt = document.querySelector("#defeatTaunt");
+    if (taunt) taunt.textContent = DEFEAT_TAUNTS[Math.floor(Math.random() * DEFEAT_TAUNTS.length)];
+  } else {
+    const form = document.querySelector("#victoryMessageForm");
+    const panel = document.querySelector("#victoryMessagesPanel");
+    if (form) form.hidden = false;
+    if (panel) panel.hidden = true;
+    const name = document.querySelector("#victoryName");
+    const message = document.querySelector("#victoryMessage");
+    if (name) name.value = localStorage.getItem("arrayDuelVictoryName") || "";
+    if (message) message.value = "";
+  }
+}
+
+function hideResultScreen() {
+  const screen = document.querySelector("#resultScreen");
+  if (screen) screen.hidden = true;
 }
 
 function openTargetDialog() {
@@ -4245,6 +4290,119 @@ function initStartScreen() {
   });
 }
 
+function formatMessageTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function renderVictoryMessages(messages) {
+  const list = document.querySelector("#victoryMessages");
+  if (!list) return;
+  list.innerHTML = "";
+  if (!messages.length) {
+    const item = document.createElement("li");
+    item.innerHTML = "<p>还没有留言。第一块胜者碑正等着你。</p>";
+    list.append(item);
+    return;
+  }
+  messages.forEach((entry) => {
+    const item = document.createElement("li");
+    const name = escapeHtml(entry.name || "无名阵师");
+    const message = escapeHtml(entry.message || "");
+    const time = escapeHtml(formatMessageTime(entry.createdAt));
+    item.innerHTML = `
+      <strong>${name}</strong>
+      <p>${message}</p>
+      ${time ? `<time>${time}</time>` : ""}
+    `;
+    list.append(item);
+  });
+}
+
+async function loadVictoryMessages() {
+  const response = await fetch(VICTORY_MESSAGES_ENDPOINT, { cache: "no-store" });
+  if (!response.ok) throw new Error("load failed");
+  const payload = await response.json();
+  renderVictoryMessages(Array.isArray(payload.messages) ? payload.messages : []);
+}
+
+async function saveVictoryMessage(name, message) {
+  const response = await fetch(VICTORY_MESSAGES_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, message }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || "save failed");
+  renderVictoryMessages(Array.isArray(payload.messages) ? payload.messages : []);
+}
+
+function restartFromResult() {
+  hideResultScreen();
+  state.resultShown = false;
+  gameStarted = true;
+  const startScreen = document.querySelector("#startScreen");
+  const gameShell = document.querySelector("#gameShell");
+  if (startScreen) startScreen.hidden = true;
+  if (gameShell) gameShell.hidden = false;
+  document.body.classList.remove("start-mode");
+  document.body.classList.add("game-mode");
+  setup();
+}
+
+function initResultScreen() {
+  const form = document.querySelector("#victoryMessageForm");
+  const saveButton = document.querySelector("#saveVictoryMessage");
+  const messagesPanel = document.querySelector("#victoryMessagesPanel");
+  const refreshButton = document.querySelector("#refreshVictoryMessages");
+  const victoryRestart = document.querySelector("#victoryRestart");
+  const defeatRestart = document.querySelector("#defeatRestart");
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const nameInput = document.querySelector("#victoryName");
+    const messageInput = document.querySelector("#victoryMessage");
+    const name = (nameInput?.value || "").trim() || "无名阵师";
+    const message = (messageInput?.value || "").trim();
+    if (!message) {
+      showToast("先留一句获胜留言。", "log-phase", "minor");
+      messageInput?.focus();
+      return;
+    }
+    localStorage.setItem("arrayDuelVictoryName", name);
+    if (saveButton) saveButton.disabled = true;
+    try {
+      await saveVictoryMessage(name, message);
+      form.hidden = true;
+      if (messagesPanel) messagesPanel.hidden = false;
+      showToast("获胜留言已保存。", "log-burst");
+    } catch {
+      showToast("留言保存失败，请稍后再试。", "log-destroy", "minor");
+    } finally {
+      if (saveButton) saveButton.disabled = false;
+    }
+  });
+
+  refreshButton?.addEventListener("click", async () => {
+    try {
+      await loadVictoryMessages();
+      showToast("玩家留言已刷新。", "log-phase", "minor");
+    } catch {
+      showToast("留言列表读取失败。", "log-destroy", "minor");
+    }
+  });
+
+  victoryRestart?.addEventListener("click", restartFromResult);
+  defeatRestart?.addEventListener("click", restartFromResult);
+}
+
 function initAiSettings() {
   const openButton = document.querySelector("#aiSettingsBtn");
   const dialog = document.querySelector("#aiDialog");
@@ -4336,6 +4494,7 @@ function initMusic() {
 
 initAiSettings();
 initStartScreen();
+initResultScreen();
 initMusic();
 loadCardArtManifest();
 render();

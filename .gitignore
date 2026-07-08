@@ -9,3 +9,4 @@ build/
 .env.*
 web/assets/cards/sheets/
 web/assets/cards/booster-preview.jpg
+web/data/*.json
