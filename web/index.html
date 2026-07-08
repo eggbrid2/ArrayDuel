@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=129" />
+    <link rel="stylesheet" href="./styles.css?v=130" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -284,7 +284,7 @@
         <h2>游戏规则</h2>
         <div class="rules-list">
           <p><strong>阵位</strong>五行槽只能放同属性卡或中台；中台可以放任意属性，阵眼只能放中台。</p>
-          <p><strong>放置</strong>主阶段可用手卡替换卡槽。同类型可直接替换，不同类型替换后不能打破三攻三防限制，阵眼不算防守位。</p>
+          <p><strong>放置</strong>主阶段可用手卡替换卡槽。攻击卡最多 3 张；防守、反击、销毁最多 3 张；恢复、永续和阵眼不占攻防名额。</p>
           <p><strong>法诀</strong>手牌可以不放入阵槽，像魔法卡一样直接打出；每种五行法诀都有多种模式，会按目标、手牌代价和灵宝碎片限制发动。</p>
           <p><strong>法诀模式</strong>木偏检索和缠根破阵，火偏焚手爆发和灼阵，土偏补灵与镇封，金偏削灵拆器，水偏重铸与滤抽续航。</p>
           <p><strong>阶段</strong>每回合依次经过准备、主1、发动、主2、结束。只有点击下一阶段或结束回合才推进流程。</p>
@@ -339,11 +339,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=129"></script>
+    <script src="./app.js?v=130"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=129").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=130").catch(() => {});
         });
       }
     </script>

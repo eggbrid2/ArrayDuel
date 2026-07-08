@@ -583,24 +583,27 @@ function countAttack(side) {
 }
 
 function countDefense(side) {
-  return Object.values(side.board).filter((slot) => slot?.mode === "defense" || slot?.mode === "ongoing").length;
+  return Object.values(side.board).filter((slot) => slot?.mode === "defense" && !["heal", "ongoing"].includes(slot.card.type)).length;
 }
 
 function placementLane(card) {
   if (card.type === "eye") return "eye";
-  return card.type === "attack" ? "attack" : "defense";
+  if (card.type === "attack") return "attack";
+  if (card.type === "heal" || card.type === "ongoing") return "support";
+  return "defense";
 }
 
 function laneLimitMessage(card) {
   const lane = placementLane(card);
   if (lane === "attack") return `攻击位已有 3 张，无法放置${card.name}。`;
-  if (lane === "defense") return `防守位已有 3 张，无法放置${card.name}。`;
+  if (lane === "defense") return `伏阵位已有 3 张，无法放置${card.name}。`;
   return `无法放置${card.name}。`;
 }
 
 function laneLabel(lane) {
   if (lane === "attack") return "攻击";
-  if (lane === "defense") return "防守";
+  if (lane === "defense") return "伏阵";
+  if (lane === "support") return "支援";
   if (lane === "eye") return "阵眼";
   return "卡";
 }
@@ -608,7 +611,8 @@ function laneLabel(lane) {
 function slotLane(slotState) {
   if (!slotState) return null;
   if (slotState.mode === "attack") return "attack";
-  if (slotState.mode === "defense" || slotState.mode === "ongoing") return "defense";
+  if (slotState.card.type === "heal" || slotState.mode === "ongoing") return "support";
+  if (slotState.mode === "defense") return "defense";
   return slotState.mode;
 }
 
@@ -627,7 +631,8 @@ function canPlaceIntoLane(side, card, slot) {
   if (lane === "eye") return true;
   if (slotLane(oldSlot) === lane) return true;
   if (lane === "attack") return countAttack(side) - (oldSlot?.mode === "attack" ? 1 : 0) < 3;
-  const replacesDefense = oldSlot?.mode === "defense" || oldSlot?.mode === "ongoing";
+  if (lane === "support") return true;
+  const replacesDefense = slotLane(oldSlot) === "defense";
   return countDefense(side) - (replacesDefense ? 1 : 0) < 3;
 }
 
@@ -646,6 +651,7 @@ function placeSlotReason(side, card, slot) {
   if (card.type === "eye" && slot !== "core") return "阵眼只能放入中台";
   if (card.type !== "eye" && ![card.element, "core"].includes(slot)) return `只能放入${LABEL[card.element]}槽或中台`;
   if (slotLane(oldSlot) === lane) return `替换已有${laneLabel(lane)}位`;
+  if (lane === "support" && canPlaceCardAt(side, card, slot)) return oldSlot ? "替换为支援位，不占攻防名额" : "支援位不占攻防名额";
   if (canPlaceCardAt(side, card, slot)) return oldSlot ? `替换后不超过三${laneLabel(lane)}` : `放置后不超过三${laneLabel(lane)}`;
   return `${laneLabel(lane)}位已有 3 张，不能新增`;
 }
@@ -671,14 +677,14 @@ function placeFailureText(side, card) {
   if (enabled.length > 0) return "";
   const lane = placementLane(card);
   if (lane === "eye") return `${card.name}只能放入中台；当前中台不可替换。`;
-  const laneFull = lane === "attack" ? countAttack(side) >= 3 : countDefense(side) >= 3;
+  const laneFull = lane === "attack" ? countAttack(side) >= 3 : lane === "defense" && countDefense(side) >= 3;
   if (laneFull) return `${laneLabel(lane)}位已有 3 张，${card.name}只能替换已有${laneLabel(lane)}位，不能放入空槽或不同类型槽。`;
   return `${card.name}只能放入${LABEL[card.element]}槽或中台。`;
 }
 
 function placeDialogText(side, card, choices) {
-  const base = `${card.name}只能放入${card.type === "eye" ? "中台" : LABEL[card.element] + "槽或中台"}；同类型可替换，不同类型需满足三攻三防上限，阵眼不计入攻防位。`;
-  const counts = `当前攻击位 ${countAttack(side)}/3，防守位 ${countDefense(side)}/3。`;
+  const base = `${card.name}只能放入${card.type === "eye" ? "中台" : LABEL[card.element] + "槽或中台"}；攻击卡最多 3 张，防守/反击/销毁最多 3 张，恢复和永续不占攻防名额。`;
+  const counts = `当前攻击位 ${countAttack(side)}/3，伏阵位 ${countDefense(side)}/3。`;
   if (choices.some((choice) => !choice.disabled)) return `${base} ${counts}`;
   return `${base} ${counts} 当前没有合法位置，请看灰色选项里的原因。`;
 }
@@ -689,7 +695,7 @@ function placePrompt(card, targets) {
     ? countAttack(state.player) >= 3
     : lane === "defense" && countDefense(state.player) >= 3;
   if (replacementOnly) {
-    return `${lane === "attack" ? "攻击位" : "防守位"}已有 3 张，${card.name}只能替换已有${lane === "attack" ? "攻击" : "防守"}位。`;
+    return `${lane === "attack" ? "攻击位" : "伏阵位"}已有 3 张，${card.name}只能替换已有${lane === "attack" ? "攻击" : "伏阵"}位。`;
   }
   return `${card.name}只能放入${LABEL[card.element]}槽或中台；中台只能表侧。`;
 }
@@ -2905,7 +2911,7 @@ function scoreEnemyPlacement(action) {
   return {
     score,
     reason: oldSlot ? `替换${TYPE[oldSlot.card.type]}，建立${TYPE[card.type]}节奏` : `补${LABEL[action.slot]}槽${TYPE[card.type]}`,
-    risk: oldSlot ? "会失去原卡" : "占用攻防名额",
+    risk: oldSlot ? "会失去原卡" : (["heal", "ongoing", "eye"].includes(card.type) ? "占用卡槽但不占攻防名额" : "占用攻防名额"),
   };
 }
 
@@ -3070,8 +3076,8 @@ function buildAiSystemPrompt() {
     "请只输出 JSON，例如：{\"actionId\":\"pass\"}，不要输出理由或思考过程。",
     "回合流程：准备阶段自动抽牌和给 1 灵石；主1可放置/替换；发动阶段只能发动 1 个场上卡槽；主2可继续放置/替换；结束阶段手牌超过 6 张要弃到 6。",
     "核心规则：五行槽为木、火、土、金、水，加中台。普通五行卡只能放到自身属性槽或中台；阵眼只能放中台，且不计入攻防位，中台只能表侧。",
-    "场上最多 3 个攻击位、3 个防守位，阵眼不算防守位。替换同类型永远合法；替换不同类型或空槽不能打破三攻三防限制。",
-    "主阶段可以用手牌替换卡槽。攻击卡通常表侧压节奏；防守、恢复、反击、销毁适合里侧埋伏；阵眼和中台用于阵法核心。",
+    "场上最多 3 个攻击位、3 个伏阵位。只有防守、反击、销毁计入伏阵位；恢复、永续、阵眼不占攻防名额。替换同类型永远合法；替换不同类型或空槽不能打破三攻三伏限制。",
+    "主阶段可以用手牌替换卡槽。攻击卡通常表侧压节奏；防守、反击、销毁适合里侧埋伏；恢复和永续是支援资源，不占三攻三伏；阵眼和中台用于阵法核心。",
     "发动阶段只能发动场上卡槽。中台攻击可攻击任意五行槽但不能攻击中台；销毁可以选择任意有卡的阵位，包括阵眼和里侧卡。",
     "玩家主阶段可把一张手牌直接打出为多模式法诀，类似魔法卡：木偏检索/缠根，火偏焚手爆发/灼阵，土偏补灵/镇封，金偏削灵/拆器，水偏重铸/滤抽。每种模式可能需要目标、额外焚化手牌或炼化灵宝碎片。AI 选择 actions 时不能自行打出不存在的法诀动作。",
     "每回合一次灵石动作：可为卡槽补灵；若有 2 灵石，可炼石抽 1；若灵宝碎片有卡，也可消耗 2 灵石重铸 1 张。AI 只能选择 actions 数组里列出的灵石动作。",
