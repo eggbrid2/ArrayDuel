@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=133" />
+    <link rel="stylesheet" href="./styles.css?v=134" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -173,7 +173,7 @@
 
       <section class="battlefield" aria-label="五行阵斗战场">
         <div class="player-area enemy-area">
-          <div class="status-line">
+          <div class="enemy-presence-row">
             <div class="ai-presence">
               <div class="ai-avatar" aria-hidden="true">
                 <span class="ai-avatar-face">阵</span>
@@ -187,17 +187,21 @@
                 <span id="aiThinkingText">推演中</span>
               </div>
             </div>
-            <div class="stat-chip">
-              <span class="label">对手</span>
-              <strong id="enemyHp">24</strong>
-              <span>生命</span>
-            </div>
-            <div class="stat-chip">
-              <span class="label">灵石</span>
-              <strong id="enemyStones">0</strong>
-            </div>
           </div>
-          <div id="enemyBoard" class="board board-enemy"></div>
+          <div class="enemy-status-frame">
+            <div class="status-line enemy-status">
+              <div class="stat-chip">
+                <span class="label">对手</span>
+                <strong id="enemyHp">24</strong>
+                <span>生命</span>
+              </div>
+              <div class="stat-chip">
+                <span class="label">灵石</span>
+                <strong id="enemyStones">0</strong>
+              </div>
+            </div>
+            <div id="enemyBoard" class="board board-enemy"></div>
+          </div>
         </div>
 
         <div class="center-column">
@@ -230,7 +234,8 @@
         </div>
 
         <div class="player-area">
-          <div class="status-line">
+          <div id="playerBoard" class="board"></div>
+          <div class="status-line player-status">
             <div class="stat-chip">
               <span class="label">玩家</span>
               <strong id="playerHp">24</strong>
@@ -241,7 +246,6 @@
               <strong id="playerStones">0</strong>
             </div>
           </div>
-          <div id="playerBoard" class="board"></div>
           <div class="hand-panel">
             <div class="hand-title">手卡 <span id="playerDiscardInfo">碎片 0</span></div>
             <div id="playerHand" class="hand"></div>
@@ -418,11 +422,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=133"></script>
+    <script src="./app.js?v=134"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=133").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=134").catch(() => {});
         });
       }
     </script>

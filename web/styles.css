@@ -659,9 +659,36 @@ body.power-pulse .battlefield::after {
   min-width: 50px;
 }
 
+.enemy-presence-row {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 12px;
+}
+
+.enemy-status-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .enemy-area .status-line {
   flex-direction: row;
   transform: none;
+}
+
+.enemy-status,
+.player-status {
+  width: 100%;
+}
+
+.enemy-status {
+  justify-content: center;
+  margin: 0 auto -2px;
+}
+
+.player-status {
+  margin-top: -2px;
 }
 
 .ai-avatar {
@@ -2906,11 +2933,25 @@ dialog h2::before {
       linear-gradient(180deg, rgba(224, 232, 220, 0.14), rgba(34, 52, 52, 0.4));
   }
 
+  .enemy-presence-row {
+    min-height: 37px;
+    padding: 0 8px;
+  }
+
   .status-line {
     min-height: 28px;
     padding: 2px 8px;
     font-size: 10px;
     gap: 5px;
+  }
+
+  .enemy-status {
+    min-height: 32px;
+    width: calc(100% - 12px);
+  }
+
+  .player-status {
+    min-height: 32px;
   }
 
   .status-line strong {
