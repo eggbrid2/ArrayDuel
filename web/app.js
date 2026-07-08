@@ -4625,7 +4625,7 @@ function renderDeckTabActions(valid) {
   } else {
     actions.push(
       { label: `图鉴 ${entries.length}`, disabled: true },
-      { label: "我的收藏", onClick: () => switchDeckTab("owned") },
+      { label: "回总卡包", onClick: () => switchDeckTab("owned") },
     );
   }
   actions.forEach((action) => {
@@ -4649,7 +4649,7 @@ function renderDeckTabCards() {
   const cards = getDeckTabEntries()
     .sort((a, b) => a.key.localeCompare(b.key, "zh-CN"));
   if (title) {
-    title.textContent = tab === "deck" ? "当前卡组" : tab === "owned" ? "我的收藏" : "补充包池";
+    title.textContent = tab === "deck" ? "当前卡组" : tab === "owned" ? "总卡包" : "卡牌图鉴";
   }
   if (summary) {
     if (tab === "deck") summary.textContent = `${countMapTotal(deck)} 张`;
@@ -4657,7 +4657,7 @@ function renderDeckTabCards() {
     else summary.textContent = `${cards.length} 种`;
   }
   if (!cards.length) {
-    root.innerHTML = `<p class="trigger-text">${tab === "owned" ? "没有可加入的非卡组卡牌。" : "没有符合筛选的卡。"}</p>`;
+    root.innerHTML = `<p class="trigger-text">${tab === "owned" ? "没有可加入卡组的卡牌。" : "没有符合筛选的卡。"}</p>`;
     return;
   }
   cards.forEach(({ key, count, card }) => {
@@ -5235,6 +5235,7 @@ function initPlayerDataUi() {
     setDeckFilterPanel(Boolean(panel?.hidden));
   });
   document.querySelector("#closeDeckFilters")?.addEventListener("click", () => setDeckFilterPanel(false));
+  document.querySelector("#openCardCatalog")?.addEventListener("click", () => switchDeckTab("pack"));
   document.querySelector("#deckPage")?.addEventListener("click", (event) => {
     const panel = document.querySelector("#deckFilterPanel");
     const toggle = document.querySelector("#toggleDeckFilters");

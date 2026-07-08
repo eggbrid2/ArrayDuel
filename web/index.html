@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=143" />
+    <link rel="stylesheet" href="./styles.css?v=144" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -293,6 +293,9 @@
             <button id="toggleDeckFilters" class="deck-icon-button" type="button" title="筛选" aria-label="筛选" aria-expanded="false" aria-controls="deckFilterPanel">
               <span aria-hidden="true">⌕</span>
             </button>
+            <button id="openCardCatalog" class="deck-icon-button" type="button" title="卡牌图鉴" aria-label="卡牌图鉴">
+              <span aria-hidden="true">鉴</span>
+            </button>
             <button id="refreshDeck" class="deck-icon-button" type="button" title="刷新" aria-label="刷新资产">
               <span aria-hidden="true">↻</span>
             </button>
@@ -330,8 +333,7 @@
         <div class="deck-builder">
           <div class="deck-view-tabs" role="tablist" aria-label="卡组编辑区">
             <button type="button" class="active" data-deck-tab="deck">卡组内</button>
-            <button type="button" data-deck-tab="owned">我的收藏</button>
-            <button type="button" data-deck-tab="pack">补充包池</button>
+            <button type="button" data-deck-tab="owned">总卡包</button>
           </div>
           <section class="deck-pane deck-pane-active">
             <div class="deck-pane-head">
@@ -530,11 +532,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=143"></script>
+    <script src="./app.js?v=144"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=143").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=144").catch(() => {});
         });
       }
     </script>
