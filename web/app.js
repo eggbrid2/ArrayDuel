@@ -4591,7 +4591,7 @@ function getDeckTabEntries() {
     .filter((entry) => {
       if (!entry.card || !cardMatchesDeckFilters(entry.card)) return false;
       const inDeck = Number(deck[entry.key] || 0);
-      return entry.count > inDeck && availableAddCount(entry.key) > 0;
+      return entry.count > inDeck;
     });
 }
 
@@ -4620,7 +4620,7 @@ function renderDeckTabActions(valid) {
   } else if (tab === "owned") {
     actions.push(
       { label: `多选 ${selectedCount}`, onClick: toggleSelectAllVisible },
-      { label: "添加", disabled: selectedCount === 0, onClick: addSelectedOwnedCards },
+      { label: "添加", disabled: selectedCount === 0 || countMapTotal(currentDeckDraft()) >= DECK_RULES.max, onClick: addSelectedOwnedCards },
     );
   } else {
     actions.push(
@@ -4653,11 +4653,11 @@ function renderDeckTabCards() {
   }
   if (summary) {
     if (tab === "deck") summary.textContent = `${countMapTotal(deck)} 张`;
-    else if (tab === "owned") summary.textContent = `${cards.reduce((sum, entry) => sum + Math.max(0, entry.count - Number(deck[entry.key] || 0)), 0)} 张可加入`;
+    else if (tab === "owned") summary.textContent = `${cards.reduce((sum, entry) => sum + Math.max(0, entry.count - Number(deck[entry.key] || 0)), 0)} 张剩余`;
     else summary.textContent = `${cards.length} 种`;
   }
   if (!cards.length) {
-    root.innerHTML = `<p class="trigger-text">${tab === "owned" ? "当前卡组已满，或筛选下没有可加入的总卡包卡牌。" : "没有符合筛选的卡。"}</p>`;
+    root.innerHTML = `<p class="trigger-text">${tab === "owned" ? "筛选下没有未加入当前卡组的总卡包卡牌。" : "没有符合筛选的卡。"}</p>`;
     return;
   }
   cards.forEach(({ key, count, card }) => {
@@ -4668,7 +4668,7 @@ function renderDeckTabCards() {
       note: tab === "deck"
         ? `${LABEL[card.element] || "中"} · ${TYPE[card.type] || "卡"}`
         : tab === "owned"
-          ? `可加入 ${Math.max(0, count - inDeck)} · 卡组 ${inDeck}/${Math.min(count, DECK_RULES.maxCopies)}`
+          ? `剩余 ${Math.max(0, count - inDeck)} · 卡组 ${inDeck}/${Math.min(count, DECK_RULES.maxCopies)}`
           : `已拥有 ${count} 张`,
       selectable: tab !== "pack",
       selected: activeDeckSelection().has(key),
@@ -4793,7 +4793,7 @@ function toggleDeckCardSelection(key) {
 }
 
 function toggleSelectAllVisible() {
-  const entries = getDeckTabEntries().filter((entry) => playerDataState.deckTab !== "owned" || availableAddCount(entry.key) > 0);
+  const entries = getDeckTabEntries();
   const selection = activeDeckSelection();
   const allSelected = entries.length > 0 && entries.every((entry) => selection.has(entry.key));
   if (allSelected) entries.forEach((entry) => selection.delete(entry.key));
