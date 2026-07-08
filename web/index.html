@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=135" />
+    <link rel="stylesheet" href="./styles.css?v=136" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -189,6 +189,7 @@
                 <span id="aiThinkingText">推演中</span>
               </div>
             </div>
+            <div id="enemyHand" class="enemy-hand" aria-label="对方手卡"></div>
           </div>
           <div class="enemy-status-frame">
             <div class="status-line enemy-status">
@@ -453,11 +454,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=135"></script>
+    <script src="./app.js?v=136"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=135").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=136").catch(() => {});
         });
       }
     </script>

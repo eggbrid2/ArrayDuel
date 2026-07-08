@@ -3869,6 +3869,7 @@ function render() {
   if (!gameStarted) return;
   renderBoard("playerBoard", state.player, "player");
   renderBoard("enemyBoard", state.enemy, "enemy");
+  renderEnemyHand();
   renderHand();
   renderTutorialPanel();
   document.querySelector("#playerHp").textContent = Math.max(0, state.player.hp);
@@ -4288,6 +4289,18 @@ function renderHand() {
       pressTimer = null;
     }, { passive: true });
     root.append(node);
+  });
+}
+
+function renderEnemyHand() {
+  const root = document.querySelector("#enemyHand");
+  if (!root) return;
+  root.innerHTML = "";
+  state.enemy.hand.forEach((_, index) => {
+    const card = document.createElement("span");
+    card.className = "enemy-hand-card";
+    card.setAttribute("aria-label", `对方手卡 ${index + 1}`);
+    root.append(card);
   });
 }
 
