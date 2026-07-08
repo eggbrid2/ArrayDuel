@@ -2473,39 +2473,49 @@ dialog h2::before {
 
 .ai-thinking-chip {
   position: absolute;
-  left: 52px;
-  bottom: -2px;
+  left: 50px;
+  bottom: 2px;
   z-index: 11;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-height: 22px;
-  padding: 0 8px;
-  border: 1px solid rgba(27, 45, 38, 0.22);
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  min-width: 52px;
+  max-width: none;
+  min-height: 18px;
+  padding: 0 7px;
+  border: 1px solid rgba(229, 197, 116, 0.36);
   border-radius: 999px;
-  background: rgba(255, 253, 247, 0.92);
-  color: #20362e;
-  font-size: 11px;
-  font-weight: 800;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 239, 179, 0.24), transparent 22px),
+    linear-gradient(180deg, rgba(23, 35, 31, 0.9), rgba(8, 14, 13, 0.86));
+  color: rgba(255, 239, 187, 0.96);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  word-break: keep-all;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18), 0 0 12px rgba(229, 197, 116, 0.12);
   opacity: 0;
-  transform: translateX(-4px);
+  pointer-events: none;
+  transform: translateX(-3px) scale(0.98);
   transition: opacity 160ms ease, transform 160ms ease;
 }
 
 .ai-thinking-chip.show {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0) scale(1);
 }
 
 .thinking-ring {
   flex: 0 0 auto;
-  width: 12px;
-  height: 12px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  border: 2px solid rgba(32, 54, 46, 0.2);
-  border-top-color: #b98434;
-  border-right-color: #3f8a57;
+  border: 2px solid rgba(255, 239, 187, 0.18);
+  border-top-color: #f0cf76;
+  border-right-color: #62c27f;
   animation: thinkingSpin 900ms linear infinite;
 }
 
@@ -3325,16 +3335,21 @@ dialog h2::before {
   }
 
   .ai-thinking-chip {
-    left: 40px;
-    bottom: -5px;
-    min-height: 18px;
+    left: 38px;
+    bottom: 1px;
+    min-width: 46px;
+    min-height: 16px;
     padding: 0 6px;
+    gap: 3px;
     font-size: 9px;
+    white-space: nowrap;
+    word-break: keep-all;
   }
 
   .thinking-ring {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
+    border-width: 2px;
   }
 
   dialog {
