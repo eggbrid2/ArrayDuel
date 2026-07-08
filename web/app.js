@@ -4372,6 +4372,9 @@ function initStartScreen() {
   const tutorialButton = document.querySelector("#tutorialBtn");
   const startRulesButton = document.querySelector("#startRulesBtn");
   const startAiButton = document.querySelector("#startAiBtn");
+  const settingsButton = document.querySelector("#settingsBtn");
+  const settingsDialog = document.querySelector("#settingsDialog");
+  const homeButton = document.querySelector("#homeBtn");
   const rulesButton = document.querySelector("#rulesBtn");
   const restartButton = document.querySelector("#restartBtn");
   const rulesDialog = document.querySelector("#rulesDialog");
@@ -4391,12 +4394,25 @@ function initStartScreen() {
   tutorialButton?.addEventListener("click", () => beginGame("tutorial"));
   startRulesButton?.addEventListener("click", () => rulesDialog?.showModal());
   rulesButton?.addEventListener("click", () => rulesDialog?.showModal());
+  settingsButton?.addEventListener("click", () => settingsDialog?.showModal());
+  homeButton?.addEventListener("click", () => {
+    settingsDialog?.close();
+    gameStarted = false;
+    resetState();
+    if (gameShell) gameShell.hidden = true;
+    if (startScreen) startScreen.hidden = false;
+    document.body.classList.remove("game-mode");
+    document.body.classList.add("start-mode");
+    hideTutorialGuide();
+    renderAuthState();
+  });
   startAiButton?.addEventListener("click", () => {
     if (window.openAiSettings) window.openAiSettings();
     else aiDialog?.showModal();
   });
   restartButton?.addEventListener("click", () => {
     if (!gameStarted) return;
+    settingsDialog?.close();
     setup();
     showToast("新战局已展开。");
   });

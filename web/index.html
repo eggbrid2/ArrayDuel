@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=132" />
+    <link rel="stylesheet" href="./styles.css?v=133" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -157,6 +157,7 @@
     </section>
 
     <main id="gameShell" class="app-shell" hidden>
+      <button id="settingsBtn" class="settings-button" type="button" aria-label="设置">设置</button>
       <section class="topbar">
         <div>
           <h1>斗阵</h1>
@@ -224,23 +225,11 @@
               <button id="spellBtn" type="button">法诀</button>
               <button id="endBtn" type="button">结束</button>
             </div>
-            <div class="utility-grid">
-              <button id="rulesBtn" class="music-toggle" type="button">规则</button>
-              <button id="restartBtn" class="music-toggle" type="button">重开</button>
-              <button id="authBtn" class="music-toggle" type="button">登录</button>
-              <button id="aiSettingsBtn" class="music-toggle" type="button">AI设置</button>
-              <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">乐 Off</button>
-            </div>
           </div>
           <ol id="log" class="log" aria-label="战斗日志"></ol>
         </div>
 
         <div class="player-area">
-          <div id="playerBoard" class="board"></div>
-          <div class="hand-panel">
-            <div class="hand-title">手卡 <span id="playerDiscardInfo">碎片 0</span></div>
-            <div id="playerHand" class="hand"></div>
-          </div>
           <div class="status-line">
             <div class="stat-chip">
               <span class="label">玩家</span>
@@ -251,6 +240,11 @@
               <span class="label">灵石</span>
               <strong id="playerStones">0</strong>
             </div>
+          </div>
+          <div id="playerBoard" class="board"></div>
+          <div class="hand-panel">
+            <div class="hand-title">手卡 <span id="playerDiscardInfo">碎片 0</span></div>
+            <div id="playerHand" class="hand"></div>
           </div>
         </div>
       </section>
@@ -374,6 +368,21 @@
       </form>
     </dialog>
 
+    <dialog id="settingsDialog">
+      <form method="dialog">
+        <h2>设置</h2>
+        <div class="settings-list">
+          <button id="homeBtn" class="music-toggle" type="button">回首页</button>
+          <button id="rulesBtn" class="music-toggle" type="button">规则</button>
+          <button id="restartBtn" class="music-toggle" type="button">重开</button>
+          <button id="authBtn" class="music-toggle" type="button">登录</button>
+          <button id="aiSettingsBtn" class="music-toggle" type="button">AI 设置</button>
+          <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">乐 Off</button>
+          <button value="close" class="secondary" type="submit">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog id="authDialog">
       <form id="authForm" method="dialog">
         <h2>玩家账号</h2>
@@ -409,11 +418,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=132"></script>
+    <script src="./app.js?v=133"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=132").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=133").catch(() => {});
         });
       }
     </script>
