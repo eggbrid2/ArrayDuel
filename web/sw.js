@@ -1,4 +1,4 @@
-const CACHE_NAME = "array-duel-v146";
+const CACHE_NAME = "array-duel-v147";
 const ASSETS = [
   "./",
   "./index.html",

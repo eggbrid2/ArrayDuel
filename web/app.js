@@ -4441,7 +4441,7 @@ function renderPlayerDataState() {
   const profile = playerDataState.profile;
   if (deckSummary) {
     deckSummary.textContent = profile
-      ? `收藏 ${collectionCount(profile)} 张 · 卡组 ${countMapTotal(profile.deck || {})} 张 · 灵石 ${profile.stones || 0}`
+      ? `总卡包 ${collectionCount(profile)} 张 · 当前卡组 ${countMapTotal(profile.deck || {})} 张 · 灵石 ${profile.stones || 0}`
       : "登录后可整理卡组。";
   }
   if (shopSummary) {
@@ -4534,7 +4534,7 @@ function renderDeckBuilder() {
   const deckSummary = document.querySelector("#deckSummary");
   const total = countMapTotal(deck);
   const valid = isDeckValid(deck);
-  if (deckSummary) deckSummary.textContent = `收藏 ${collectionCount(profile)} 张 · 当前卡组 ${total} 张`;
+  if (deckSummary) deckSummary.textContent = `总卡包 ${collectionCount(profile)} 张 · 当前卡组 ${total} 张`;
   if (deckStatus) {
     deckStatus.textContent = `${deckRuleText(deck)} · ${deckFilterText().replace(/^筛选：/, "筛选 ")}`;
     deckStatus.classList.toggle("valid", valid);
@@ -4657,7 +4657,7 @@ function renderDeckTabCards() {
     else summary.textContent = `${cards.length} 种`;
   }
   if (!cards.length) {
-    root.innerHTML = `<p class="trigger-text">${tab === "owned" ? "没有可加入卡组的卡牌。" : "没有符合筛选的卡。"}</p>`;
+    root.innerHTML = `<p class="trigger-text">${tab === "owned" ? "当前卡组已满，或筛选下没有可加入的总卡包卡牌。" : "没有符合筛选的卡。"}</p>`;
     return;
   }
   cards.forEach(({ key, count, card }) => {

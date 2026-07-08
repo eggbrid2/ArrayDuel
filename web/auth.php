@@ -347,7 +347,7 @@ function validateDeck(array $deck, array $collection): array
         $amount = (int)$count;
         $owned = (int)($collection[$key] ?? 0);
         if ($owned <= 0) $issues[] = '包含未拥有卡牌';
-        if ($amount > $owned) $issues[] = '卡组数量超过收藏';
+        if ($amount > $owned) $issues[] = '卡组数量超过总卡包';
         if ($amount > DECK_MAX_COPIES) $issues[] = '同名最多 ' . DECK_MAX_COPIES . ' 张';
         [$element, $name] = explode(':', (string)$key, 2);
         if (in_array($element, DECK_ELEMENTS, true)) $elementCounts[$element] += $amount;
