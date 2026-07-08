@@ -9,19 +9,137 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=129" />
+    <style>
+      body.start-mode {
+        min-height: 100svh;
+        margin: 0;
+        overflow: hidden;
+        background: #050807;
+      }
+
+      body.start-mode .start-screen {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        width: 100vw;
+        min-height: 100svh;
+        padding: calc(22px + env(safe-area-inset-top, 0px)) 18px calc(22px + env(safe-area-inset-bottom, 0px));
+        color: #fffdf7;
+        background: #050807;
+      }
+
+      body.start-mode .start-screen::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background: url("./assets/ui/start-bg-cover.jpg") center / cover no-repeat;
+        transform: scale(1.01);
+      }
+
+      body.start-mode .start-screen::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(180deg, rgba(2, 5, 6, 0.08), rgba(2, 5, 6, 0.22) 42%, rgba(2, 5, 6, 0.84)),
+          radial-gradient(circle at 50% 58%, rgba(229, 197, 116, 0.18), transparent 17rem);
+      }
+
+      body.start-mode .start-panel {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        justify-items: center;
+        align-content: end;
+        gap: 18px;
+        width: min(430px, 100%);
+        min-height: calc(100svh - 44px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        padding: 0 10px 10px;
+      }
+
+      body.start-mode .start-copy {
+        text-align: center;
+        text-shadow: 0 4px 22px rgba(0, 0, 0, 0.62);
+      }
+
+      body.start-mode .start-kicker {
+        display: inline-flex;
+        margin-bottom: 10px;
+        padding: 5px 13px;
+        border: 1px solid rgba(238, 205, 120, 0.42);
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(30, 21, 9, 0.46), rgba(143, 93, 28, 0.22));
+        color: rgba(255, 234, 174, 0.96);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        box-shadow: 0 0 24px rgba(229, 197, 116, 0.18);
+      }
+
+      body.start-mode .start-copy h1 {
+        margin: 0;
+        color: #fff0b5;
+        font-size: clamp(64px, 18vw, 98px);
+        line-height: 1;
+        letter-spacing: 0;
+        font-weight: 950;
+        text-shadow: 0 3px 0 rgba(74, 38, 8, 0.62), 0 0 28px rgba(255, 215, 114, 0.36), 0 14px 34px rgba(0, 0, 0, 0.72);
+      }
+
+      body.start-mode .start-copy p {
+        max-width: 360px;
+        margin: 12px auto 0;
+        color: rgba(255, 250, 230, 0.86);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      body.start-mode .start-actions {
+        display: grid;
+        gap: 11px;
+        width: min(330px, 100%);
+      }
+
+      body.start-mode .primary-action,
+      body.start-mode .secondary-action {
+        width: 100%;
+        min-height: 50px;
+        border-radius: 8px;
+        font-size: 17px;
+      }
+
+      body.start-mode .primary-action {
+        border-color: rgba(229, 197, 116, 0.72);
+        background: linear-gradient(180deg, #ffe69d, #d0a24f 46%, #9a6424);
+        color: #17140c;
+        box-shadow: 0 10px 30px rgba(229, 197, 116, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.66), inset 0 -2px 0 rgba(91, 52, 14, 0.42);
+      }
+
+      body.start-mode .secondary-action {
+        border-color: rgba(255, 244, 205, 0.24);
+        background: linear-gradient(180deg, rgba(30, 38, 39, 0.62), rgba(10, 14, 15, 0.58));
+        color: #fffdf7;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 20px rgba(0, 0, 0, 0.24);
+      }
+
+      @media (max-width: 640px) {
+        body.start-mode .start-panel {
+          gap: 16px;
+          padding-bottom: 4px;
+        }
+      }
+    </style>
   </head>
   <body class="start-mode">
     <section id="startScreen" class="start-screen" aria-label="斗阵开始界面">
       <div class="start-panel">
-        <div class="start-array" aria-hidden="true">
-          <span class="start-node start-fire">火</span>
-          <span class="start-node start-earth">土</span>
-          <span class="start-node start-metal">金</span>
-          <span class="start-node start-water">水</span>
-          <span class="start-node start-wood">木</span>
-          <span class="start-core">阵</span>
-        </div>
         <div class="start-copy">
           <span class="start-kicker">Array Duel</span>
           <h1>斗阵</h1>
@@ -29,6 +147,7 @@
         </div>
         <div class="start-actions">
           <button id="startGameBtn" class="primary-action" type="button">开始游戏</button>
+          <button id="tutorialBtn" class="secondary-action" type="button">新手关卡</button>
           <button id="startRulesBtn" class="secondary-action" type="button">游戏规则</button>
           <button id="startAiBtn" class="secondary-action" type="button">AI 设置</button>
         </div>
@@ -42,10 +161,6 @@
           <p>Array Duel · 六槽阵法 · 灵力流转</p>
         </div>
         <div class="topbar-right">
-          <button id="rulesBtn" class="music-toggle" type="button">规则</button>
-          <button id="restartBtn" class="music-toggle" type="button">重开</button>
-          <button id="aiSettingsBtn" class="music-toggle" type="button">AI设置</button>
-          <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">乐 Off</button>
           <div class="round-panel">
             <span id="turnLabel">玩家回合</span>
             <strong id="roundLabel">第 1 回合</strong>
@@ -56,12 +171,25 @@
       <section class="battlefield" aria-label="五行阵斗战场">
         <div class="player-area enemy-area">
           <div class="status-line">
-            <div>
+            <div class="ai-presence">
+              <div class="ai-avatar" aria-hidden="true">
+                <span class="ai-avatar-face">阵</span>
+              </div>
+              <div id="aiTauntBubble" class="ai-taunt-bubble" role="status" aria-live="polite" hidden>
+                <span class="ai-taunt-name">对手</span>
+                <p id="aiTauntText">你这阵摆得太散了。</p>
+              </div>
+              <div id="aiThinking" class="ai-thinking-chip" aria-live="polite" hidden>
+                <span class="thinking-ring" aria-hidden="true"></span>
+                <span id="aiThinkingText">推演中</span>
+              </div>
+            </div>
+            <div class="stat-chip">
               <span class="label">对手</span>
-              <strong id="enemyHp">18</strong>
+              <strong id="enemyHp">24</strong>
               <span>生命</span>
             </div>
-            <div>
+            <div class="stat-chip">
               <span class="label">灵石</span>
               <strong id="enemyStones">0</strong>
             </div>
@@ -70,6 +198,7 @@
         </div>
 
         <div class="center-column">
+          <div class="versus-divider" aria-hidden="true"><span>VS</span></div>
           <div class="wuxing-ring" aria-hidden="true">
             <span class="node wood">木</span>
             <span class="node fire">火</span>
@@ -79,12 +208,25 @@
             <span class="core">中</span>
           </div>
           <div class="action-panel">
-            <div id="selectedInfo" class="selected-info">选择己方卡槽</div>
-            <div class="button-grid">
+          <div id="selectedInfo" class="selected-info">选择己方卡槽</div>
+          <div id="tutorialPanel" class="tutorial-panel" hidden>
+            <span id="tutorialProgress">教程 1/10</span>
+            <strong id="tutorialTitle">认识阵盘</strong>
+            <p id="tutorialHint">查看卡槽效果。</p>
+            <button id="tutorialHelpBtn" type="button">目标提示</button>
+          </div>
+          <div class="button-grid">
               <button id="imbueBtn" type="button">补灵</button>
               <button id="activateBtn" type="button">发动</button>
               <button id="replaceBtn" type="button">放置</button>
+              <button id="spellBtn" type="button">法诀</button>
               <button id="endBtn" type="button">结束</button>
+            </div>
+            <div class="utility-grid">
+              <button id="rulesBtn" class="music-toggle" type="button">规则</button>
+              <button id="restartBtn" class="music-toggle" type="button">重开</button>
+              <button id="aiSettingsBtn" class="music-toggle" type="button">AI设置</button>
+              <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">乐 Off</button>
             </div>
           </div>
           <ol id="log" class="log" aria-label="战斗日志"></ol>
@@ -93,16 +235,16 @@
         <div class="player-area">
           <div id="playerBoard" class="board"></div>
           <div class="hand-panel">
-            <div class="hand-title">手卡</div>
+            <div class="hand-title">手卡 <span id="playerDiscardInfo">碎片 0</span></div>
             <div id="playerHand" class="hand"></div>
           </div>
           <div class="status-line">
-            <div>
+            <div class="stat-chip">
               <span class="label">玩家</span>
-              <strong id="playerHp">18</strong>
+              <strong id="playerHp">24</strong>
               <span>生命</span>
             </div>
-            <div>
+            <div class="stat-chip">
               <span class="label">灵石</span>
               <strong id="playerStones">0</strong>
             </div>
@@ -130,6 +272,7 @@
     <dialog id="cardDialog">
       <form method="dialog">
         <h2 id="cardTitle">卡牌详情</h2>
+        <div id="cardArtwork" class="card-artwork" hidden></div>
         <p id="cardMeta" class="trigger-text"></p>
         <p id="cardText" class="trigger-text"></p>
         <button value="close" class="secondary">关闭</button>
@@ -142,10 +285,17 @@
         <div class="rules-list">
           <p><strong>阵位</strong>五行槽只能放同属性卡或中台；中台可以放任意属性，阵眼只能放中台。</p>
           <p><strong>放置</strong>主阶段可用手卡替换卡槽。同类型可直接替换，不同类型替换后不能打破三攻三防限制，阵眼不算防守位。</p>
+          <p><strong>法诀</strong>手牌可以不放入阵槽，像魔法卡一样直接打出；每种五行法诀都有多种模式，会按目标、手牌代价和灵宝碎片限制发动。</p>
+          <p><strong>法诀模式</strong>木偏检索和缠根破阵，火偏焚手爆发和灼阵，土偏补灵与镇封，金偏削灵拆器，水偏重铸与滤抽续航。</p>
           <p><strong>阶段</strong>每回合依次经过准备、主1、发动、主2、结束。只有点击下一阶段或结束回合才推进流程。</p>
-          <p><strong>战斗</strong>攻击槽对攻击槽按灵力相减，并计算五行克制；溢出不反伤。攻击空槽会直接伤害生命。</p>
+          <p><strong>战斗</strong>攻击槽对攻击槽按灵力相减，并计算五行克制；攻击方溢出会伤害对手，防守攻击位更高时会把差值反震给攻击方。</p>
+          <p><strong>反击陷阱</strong>反击卡翻开时会读取反击属性、被攻击槽位和攻击来源的五行生克，连锁补阵、补手、削弱、重铸或蓄势。</p>
+          <p><strong>灵石</strong>每回合一次灵石动作：补灵，或消耗 2 灵石抽 1；灵宝碎片有卡时也可消耗 2 灵石重铸 1 张。</p>
+          <p><strong>法诀联协</strong>发动攻击或销毁前，可消耗一张手卡借相生、同源或压制关系增幅。本次不会额外发动攻击卡。</p>
+          <p><strong>周天阵眼</strong>五行槽俱全时，中台阵眼会触发不同威力：火灼伤、金追击、木养阵、水回天、土护阵。</p>
           <p><strong>防守</strong>防守卡可表侧或里侧放置。被攻击时会询问是否发动防守和相生联协，联协不能发动攻击卡。</p>
-          <p><strong>手卡</strong>开局填满六槽并获得五张手卡；每回合随机抽一张，结束时手卡超过六张需要舍弃。</p>
+          <p><strong>灵宝碎片</strong>弃置、被破坏、被替换和联协消耗的卡会化为灵宝碎片，可用灵石重铸回手牌。</p>
+          <p><strong>新手关卡</strong>会给出连续训练目标，引导你亲手完成查看卡片、替换、补灵、克制攻击、手牌联协和直接打法诀。</p>
         </div>
         <button value="close" class="secondary">关闭</button>
       </form>
@@ -186,22 +336,14 @@
       </form>
     </dialog>
 
-    <div id="aiThinking" class="thinking-overlay" aria-live="polite" hidden>
-      <div class="thinking-panel">
-        <span class="thinking-ring" aria-hidden="true"></span>
-        <strong>大模型思考中</strong>
-        <span id="aiThinkingText">对手正在推演阵法...</span>
-      </div>
-    </div>
-
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=129"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=129").catch(() => {});
         });
       }
     </script>

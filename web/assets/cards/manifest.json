@@ -1,0 +1,802 @@
+[
+  {
+    "name": "青藤剑诀",
+    "type": "attack",
+    "value": 2,
+    "text": "木克土。水生木时加灵，克制击破后为手牌最低灵力卡补 1。",
+    "element": "wood",
+    "filename": "wood-01.jpg"
+  },
+  {
+    "name": "万木穿岩",
+    "type": "attack",
+    "value": 2,
+    "text": "攻击永续时灵力相减。若场上有水卡，额外压低目标 1 灵力。",
+    "element": "wood",
+    "filename": "wood-02.jpg"
+  },
+  {
+    "name": "扶桑破阵",
+    "type": "attack",
+    "value": 3,
+    "text": "高灵力木系攻击。周天木阵时，击破后己方一张卡补 1 灵力。",
+    "element": "wood",
+    "filename": "wood-03.jpg"
+  },
+  {
+    "name": "藤影连刺",
+    "type": "attack",
+    "value": 2,
+    "text": "稳定攻击。可消耗水系手卡联协，获得 +1 灵力。",
+    "element": "wood",
+    "filename": "wood-04.jpg"
+  },
+  {
+    "name": "灵藤护身",
+    "type": "defense",
+    "value": 2,
+    "text": "抵消 2 点伤害。被水生木联协时额外回复 1。",
+    "element": "wood",
+    "filename": "wood-05.jpg"
+  },
+  {
+    "name": "春生术",
+    "type": "heal",
+    "value": 2,
+    "text": "触发时回复 2 生命。金生水、水生木链完整时额外抽 1。",
+    "element": "wood",
+    "filename": "wood-06.jpg"
+  },
+  {
+    "name": "青藤反缚",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。按木与被攻槽、攻击来源的生克关系连锁：补阵、抽牌、削攻或蓄势。",
+    "element": "wood",
+    "filename": "wood-07.jpg"
+  },
+  {
+    "name": "斩根符",
+    "type": "destroy",
+    "value": 2,
+    "text": "破坏永续、压阵或阵眼。木克土目标时返还 1 灵石。",
+    "element": "wood",
+    "filename": "wood-08.jpg"
+  },
+  {
+    "name": "青木灵泉",
+    "type": "ongoing",
+    "value": 4,
+    "text": "准备阶段回复 1。火卡发动时，木生火提供阵势。",
+    "element": "wood",
+    "filename": "wood-09.jpg"
+  },
+  {
+    "name": "引火灵芽",
+    "type": "heal",
+    "value": 1,
+    "text": "回复 1 并定向抽 1 张火卡；作为木法诀时木生火可补 2 火。",
+    "element": "wood",
+    "filename": "wood-10.jpg"
+  },
+  {
+    "name": "空庭生枝",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。对方攻击木所生之槽或木槽空位时，更容易补阵和抽木系手牌。",
+    "element": "wood",
+    "filename": "wood-11.jpg"
+  },
+  {
+    "name": "藤门借道",
+    "type": "defense",
+    "value": 1,
+    "text": "护阵拦截。联协后若仍有伤害，抽 1 张木系卡。",
+    "element": "wood",
+    "filename": "wood-12.jpg"
+  },
+  {
+    "name": "枯荣返青",
+    "type": "heal",
+    "value": 2,
+    "text": "回复 2；若灵宝碎片有木卡，重铸 1 张木卡。",
+    "element": "wood",
+    "filename": "wood-13.jpg"
+  },
+  {
+    "name": "灵根搜火",
+    "type": "ongoing",
+    "value": 3,
+    "text": "准备阶段若有灵宝碎片，炼化 1 个碎片并定向抽其相生属性卡。",
+    "element": "wood",
+    "filename": "wood-14.jpg"
+  },
+  {
+    "name": "缠山破土",
+    "type": "attack",
+    "value": 2,
+    "text": "攻击土槽时压低目标 1 灵力；打空土槽会担心土槽陷阱补阵。",
+    "element": "wood",
+    "filename": "wood-15.jpg"
+  },
+  {
+    "name": "枝影换位",
+    "type": "destroy",
+    "value": 1,
+    "text": "削弱或拆除低灵力卡；若破坏土系目标，抽 1 张火卡。",
+    "element": "wood",
+    "filename": "wood-16.jpg"
+  },
+  {
+    "name": "木火引线",
+    "type": "attack",
+    "value": 1,
+    "text": "低灵力启动牌。若本次有木生火阵势，攻击后抽 1 张火系卡。",
+    "element": "wood",
+    "filename": "wood-17.jpg"
+  },
+  {
+    "name": "翠幕反卷",
+    "type": "counter",
+    "value": 2,
+    "text": "反击陷阱。相生时补阵，相克时削攻；同源时抽木并使下一次攻击 +1。",
+    "element": "wood",
+    "filename": "wood-18.jpg"
+  },
+  {
+    "name": "万象萌动",
+    "type": "ongoing",
+    "value": 4,
+    "text": "每次以灵石重铸灵宝碎片后，己方最低灵力槽 +1。",
+    "element": "wood",
+    "filename": "wood-19.jpg"
+  },
+  {
+    "name": "赤霄火剑",
+    "type": "attack",
+    "value": 2,
+    "text": "火克金。木生火时加灵，克制击破会追加灼伤生命。",
+    "element": "fire",
+    "filename": "fire-01.jpg"
+  },
+  {
+    "name": "流火飞星",
+    "type": "attack",
+    "value": 2,
+    "text": "中台发动可攻击任意五行槽。火阵周天时溢出更狠。",
+    "element": "fire",
+    "filename": "fire-02.jpg"
+  },
+  {
+    "name": "朱雀焚阵",
+    "type": "attack",
+    "value": 3,
+    "text": "高灵力火系攻击。消耗木系手卡联协时，直接进入爆发。",
+    "element": "fire",
+    "filename": "fire-03.jpg"
+  },
+  {
+    "name": "炎龙吐息",
+    "type": "attack",
+    "value": 2,
+    "text": "稳定攻击，克金破木。目标为金时额外 +1 灵力。",
+    "element": "fire",
+    "filename": "fire-04.jpg"
+  },
+  {
+    "name": "烈焰护体",
+    "type": "defense",
+    "value": 1,
+    "text": "抵消 1，并可反击。木生火联协时反击 +1。",
+    "element": "fire",
+    "filename": "fire-05.jpg"
+  },
+  {
+    "name": "丹火续脉",
+    "type": "heal",
+    "value": 2,
+    "text": "触发时回复 2。若本回合火克金成功，额外回复 1。",
+    "element": "fire",
+    "filename": "fire-06.jpg"
+  },
+  {
+    "name": "火鸦返击",
+    "type": "counter",
+    "value": 2,
+    "text": "反击陷阱。火生土可在土空槽补土攻击，木生火可在木空槽补木系手牌。",
+    "element": "fire",
+    "filename": "fire-07.jpg"
+  },
+  {
+    "name": "离火破金符",
+    "type": "destroy",
+    "value": 3,
+    "text": "破坏金系永续更强。克制目标时无视阵眼守护。",
+    "element": "fire",
+    "filename": "fire-08.jpg"
+  },
+  {
+    "name": "离火炼炉",
+    "type": "ongoing",
+    "value": 4,
+    "text": "发动火卡时灼伤 1。木槽存在时火卡更容易爆发。",
+    "element": "fire",
+    "filename": "fire-09.jpg"
+  },
+  {
+    "name": "焚手赤令",
+    "type": "attack",
+    "value": 1,
+    "text": "可用手牌联协爆发；作为火法诀时焚化手牌换抽火卡。",
+    "element": "fire",
+    "filename": "fire-10.jpg"
+  },
+  {
+    "name": "土烬新生",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。对方攻击土空槽时，火生土补入土攻击卡并 +2 灵力。",
+    "element": "fire",
+    "filename": "fire-11.jpg"
+  },
+  {
+    "name": "薪尽爆燃",
+    "type": "destroy",
+    "value": 2,
+    "text": "焚化手牌拆阵。若目标被破坏，抽 1 张土系卡。",
+    "element": "fire",
+    "filename": "fire-12.jpg"
+  },
+  {
+    "name": "朱焰献祭",
+    "type": "heal",
+    "value": 1,
+    "text": "回复 1；可焚化 1 张手牌改为抽 2 张火卡。",
+    "element": "fire",
+    "filename": "fire-13.jpg"
+  },
+  {
+    "name": "燎原空袭",
+    "type": "attack",
+    "value": 2,
+    "text": "打空槽时伤害 +1，但更容易吃护阵反击陷阱。",
+    "element": "fire",
+    "filename": "fire-14.jpg"
+  },
+  {
+    "name": "焚卷成灰",
+    "type": "destroy",
+    "value": 1,
+    "text": "破坏后令对手弃 1 张手牌；若焚化木系联协，改为弃 2 选 1。",
+    "element": "fire",
+    "filename": "fire-15.jpg"
+  },
+  {
+    "name": "火土连环",
+    "type": "ongoing",
+    "value": 3,
+    "text": "准备阶段若土槽为空，补 1 张土系手牌；若土槽有卡，则土槽 +1 灵力。",
+    "element": "fire",
+    "filename": "fire-16.jpg"
+  },
+  {
+    "name": "逆焰返魂",
+    "type": "counter",
+    "value": 2,
+    "text": "反击陷阱。若火被水克，削攻后从灵宝碎片重铸火卡或回复。",
+    "element": "fire",
+    "filename": "fire-17.jpg"
+  },
+  {
+    "name": "离火借木",
+    "type": "attack",
+    "value": 2,
+    "text": "若有木槽或焚化木手牌，本次攻击 +1，并在结算后抽 1 张火卡。",
+    "element": "fire",
+    "filename": "fire-18.jpg"
+  },
+  {
+    "name": "赤炉续焰",
+    "type": "ongoing",
+    "value": 4,
+    "text": "每回合首次焚化手牌后，获得 1 灵石。",
+    "element": "fire",
+    "filename": "fire-19.jpg"
+  },
+  {
+    "name": "镇岳印",
+    "type": "attack",
+    "value": 2,
+    "text": "土克水。火生土时加灵，克制击破后获得 1 护阵。",
+    "element": "earth",
+    "filename": "earth-01.jpg"
+  },
+  {
+    "name": "昆仑坠",
+    "type": "attack",
+    "value": 3,
+    "text": "高灵力攻击。土阵周天时，出手后己方关键卡保 1 灵力。",
+    "element": "earth",
+    "filename": "earth-02.jpg"
+  },
+  {
+    "name": "山河镇杀",
+    "type": "attack",
+    "value": 3,
+    "text": "高灵力土系攻击。消耗火系手卡联协时攻击 +1。",
+    "element": "earth",
+    "filename": "earth-03.jpg"
+  },
+  {
+    "name": "裂地灵锥",
+    "type": "attack",
+    "value": 2,
+    "text": "稳定攻击，压制水火。目标为水时额外削 1 灵力。",
+    "element": "earth",
+    "filename": "earth-04.jpg"
+  },
+  {
+    "name": "玄岩盾",
+    "type": "defense",
+    "value": 2,
+    "text": "抵消 2 点伤害。火生土联协时本槽不被消耗。",
+    "element": "earth",
+    "filename": "earth-05.jpg"
+  },
+  {
+    "name": "地脉回息",
+    "type": "heal",
+    "value": 1,
+    "text": "回复 1，补灵 1。土阵周天时改为补两处。",
+    "element": "earth",
+    "filename": "earth-06.jpg"
+  },
+  {
+    "name": "崩山反震",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。土生金可补金势；火生土可回流抽火，土克水则强削攻击。",
+    "element": "earth",
+    "filename": "earth-07.jpg"
+  },
+  {
+    "name": "崩山符",
+    "type": "destroy",
+    "value": 2,
+    "text": "破坏永续或压阵。土克水目标时额外伤害生命 1。",
+    "element": "earth",
+    "filename": "earth-08.jpg"
+  },
+  {
+    "name": "厚土归元阵",
+    "type": "ongoing",
+    "value": 5,
+    "text": "中台受伤 -1。五行俱全时保护最低灵力卡。",
+    "element": "earth",
+    "filename": "earth-09.jpg"
+  },
+  {
+    "name": "炼片成璧",
+    "type": "heal",
+    "value": 1,
+    "text": "炼化灵宝碎片回血；主动发动时若有碎片，获得 1 灵石。",
+    "element": "earth",
+    "filename": "earth-10.jpg"
+  },
+  {
+    "name": "金胎伏藏",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。对方攻击金空槽时，土生金补入金攻击卡并 +2 灵力。",
+    "element": "earth",
+    "filename": "earth-11.jpg"
+  },
+  {
+    "name": "埋玉补山",
+    "type": "defense",
+    "value": 2,
+    "text": "抵消伤害；触发后若有灵宝碎片，己方最低灵力槽 +1。",
+    "element": "earth",
+    "filename": "earth-12.jpg"
+  },
+  {
+    "name": "地炉开脉",
+    "type": "ongoing",
+    "value": 4,
+    "text": "准备阶段若有灵宝碎片，消耗 1 个碎片获得 1 灵石。",
+    "element": "earth",
+    "filename": "earth-13.jpg"
+  },
+  {
+    "name": "坤岳回填",
+    "type": "heal",
+    "value": 2,
+    "text": "回复 2，并从灵宝碎片重铸 1 张防守或反击卡。",
+    "element": "earth",
+    "filename": "earth-14.jpg"
+  },
+  {
+    "name": "镇水断流",
+    "type": "attack",
+    "value": 2,
+    "text": "土克水。击破水系目标后获得 1 灵石并抽 1 张金卡。",
+    "element": "earth",
+    "filename": "earth-15.jpg"
+  },
+  {
+    "name": "厚土炼阵",
+    "type": "destroy",
+    "value": 1,
+    "text": "炼化碎片镇封敌槽；若目标灵力降为 0，改为破坏。",
+    "element": "earth",
+    "filename": "earth-16.jpg"
+  },
+  {
+    "name": "山门空壁",
+    "type": "counter",
+    "value": 2,
+    "text": "反击陷阱。空槽护阵时额外抵消 1，并补己方最低灵力槽。",
+    "element": "earth",
+    "filename": "earth-17.jpg"
+  },
+  {
+    "name": "火种入土",
+    "type": "attack",
+    "value": 1,
+    "text": "若焚化火系手牌联协，本次 +2；攻击后抽 1 张土卡。",
+    "element": "earth",
+    "filename": "earth-18.jpg"
+  },
+  {
+    "name": "息壤不竭",
+    "type": "ongoing",
+    "value": 5,
+    "text": "灵石补灵时，若灵宝碎片有卡，可额外为相生槽 +1。",
+    "element": "earth",
+    "filename": "earth-19.jpg"
+  },
+  {
+    "name": "庚金飞刃",
+    "type": "attack",
+    "value": 2,
+    "text": "金克木。土生金时加灵，击破后可再削敌方一槽 1 灵力。",
+    "element": "metal",
+    "filename": "metal-01.jpg"
+  },
+  {
+    "name": "破甲剑光",
+    "type": "attack",
+    "value": 2,
+    "text": "无视 1 点防御。消耗土系手卡联协时额外破甲。",
+    "element": "metal",
+    "filename": "metal-02.jpg"
+  },
+  {
+    "name": "太白斩灵",
+    "type": "attack",
+    "value": 3,
+    "text": "高灵力金系攻击。金阵周天时击破后追加一次斩击。",
+    "element": "metal",
+    "filename": "metal-03.jpg"
+  },
+  {
+    "name": "百炼剑雨",
+    "type": "attack",
+    "value": 2,
+    "text": "稳定攻击，破木镇土。目标为木时额外 +1 灵力。",
+    "element": "metal",
+    "filename": "metal-04.jpg"
+  },
+  {
+    "name": "金钟罩",
+    "type": "defense",
+    "value": 2,
+    "text": "抵消 2。土生金联协时获得 1 灵力。",
+    "element": "metal",
+    "filename": "metal-05.jpg"
+  },
+  {
+    "name": "玉液金丹",
+    "type": "heal",
+    "value": 2,
+    "text": "回复 2 生命。金生水链存在时额外抽 1。",
+    "element": "metal",
+    "filename": "metal-06.jpg"
+  },
+  {
+    "name": "镜刃反照",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。金克木强反噬；土生金可补金阵，金生水可引水回流。",
+    "element": "metal",
+    "filename": "metal-07.jpg"
+  },
+  {
+    "name": "裂器符",
+    "type": "destroy",
+    "value": 2,
+    "text": "破坏永续或压阵。金克木目标时改为破坏后抽 1。",
+    "element": "metal",
+    "filename": "metal-08.jpg"
+  },
+  {
+    "name": "庚金剑阵",
+    "type": "ongoing",
+    "value": 4,
+    "text": "金攻击首次 +1。水槽存在时金生水，水卡也获势。",
+    "element": "metal",
+    "filename": "metal-09.jpg"
+  },
+  {
+    "name": "焚契斩灵",
+    "type": "destroy",
+    "value": 2,
+    "text": "焚化手牌削灵；焚化土卡时额外 -1，并令对方失去 1 灵石。",
+    "element": "metal",
+    "filename": "metal-10.jpg"
+  },
+  {
+    "name": "水刃伏流",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。对方攻击水空槽时，金生水补入水攻击卡并 +2 灵力。",
+    "element": "metal",
+    "filename": "metal-11.jpg"
+  },
+  {
+    "name": "白虎夺气",
+    "type": "attack",
+    "value": 2,
+    "text": "金克木。击破木系目标后，对手失去 1 灵石，你抽 1 张水卡。",
+    "element": "metal",
+    "filename": "metal-12.jpg"
+  },
+  {
+    "name": "碎玉搜水",
+    "type": "heal",
+    "value": 1,
+    "text": "回复 1，并定向抽 1 张水卡；若有土槽，额外获得 1 灵石。",
+    "element": "metal",
+    "filename": "metal-13.jpg"
+  },
+  {
+    "name": "斩念弃牌",
+    "type": "destroy",
+    "value": 1,
+    "text": "破坏低灵力目标；若破坏成功，对手弃 1 张手牌。",
+    "element": "metal",
+    "filename": "metal-14.jpg"
+  },
+  {
+    "name": "金水桥",
+    "type": "ongoing",
+    "value": 3,
+    "text": "准备阶段若水槽为空，补 1 张水系手牌；若水槽有卡，则水槽 +1 灵力。",
+    "element": "metal",
+    "filename": "metal-15.jpg"
+  },
+  {
+    "name": "断木回响",
+    "type": "counter",
+    "value": 2,
+    "text": "反击陷阱。金克木时反噬更强；同源时抽金并蓄势。",
+    "element": "metal",
+    "filename": "metal-16.jpg"
+  },
+  {
+    "name": "销灵冷锋",
+    "type": "attack",
+    "value": 1,
+    "text": "攻击前削目标 1 灵力；若目标被削破，改为抽 1 张金卡。",
+    "element": "metal",
+    "filename": "metal-17.jpg"
+  },
+  {
+    "name": "百炼藏锋",
+    "type": "defense",
+    "value": 2,
+    "text": "抵消 2；触发后下一次攻击 +1。",
+    "element": "metal",
+    "filename": "metal-18.jpg"
+  },
+  {
+    "name": "太白炼片炉",
+    "type": "ongoing",
+    "value": 4,
+    "text": "每次从灵宝碎片重铸后，定向抽 1 张金或水卡。",
+    "element": "metal",
+    "filename": "metal-19.jpg"
+  },
+  {
+    "name": "寒泉剑气",
+    "type": "attack",
+    "value": 2,
+    "text": "水克火。金生水时加灵，克制击破后回复 1 生命。",
+    "element": "water",
+    "filename": "water-01.jpg"
+  },
+  {
+    "name": "冰魄飞针",
+    "type": "attack",
+    "value": 2,
+    "text": "对火克制更强。消耗金系手卡联协时攻击 +1。",
+    "element": "water",
+    "filename": "water-02.jpg"
+  },
+  {
+    "name": "玄浪吞火",
+    "type": "attack",
+    "value": 3,
+    "text": "高灵力水系攻击。水阵周天时可把伤害转成回复。",
+    "element": "water",
+    "filename": "water-03.jpg"
+  },
+  {
+    "name": "沧海灵刃",
+    "type": "attack",
+    "value": 2,
+    "text": "稳定攻击，克火生木。目标为火时额外回复 1。",
+    "element": "water",
+    "filename": "water-04.jpg"
+  },
+  {
+    "name": "水镜术",
+    "type": "defense",
+    "value": 1,
+    "text": "抵消 1，并回复 1。金生水联协时再抽 1。",
+    "element": "water",
+    "filename": "water-05.jpg"
+  },
+  {
+    "name": "甘霖诀",
+    "type": "heal",
+    "value": 2,
+    "text": "回复 2 生命。若本回合触发相生，额外补灵 1。",
+    "element": "water",
+    "filename": "water-06.jpg"
+  },
+  {
+    "name": "寒潭倒影",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。水克火强削攻；金生水可回流抽金，水生木可补木阵。",
+    "element": "water",
+    "filename": "water-07.jpg"
+  },
+  {
+    "name": "玄水灭火符",
+    "type": "destroy",
+    "value": 3,
+    "text": "破坏火系永续更强。水克火目标时回复 1。",
+    "element": "water",
+    "filename": "water-08.jpg"
+  },
+  {
+    "name": "寒潭灵脉",
+    "type": "ongoing",
+    "value": 4,
+    "text": "准备阶段为永续补灵 1。木卡发动时，水生木提供阵势。",
+    "element": "water",
+    "filename": "water-09.jpg"
+  },
+  {
+    "name": "沧海重铸",
+    "type": "heal",
+    "value": 1,
+    "text": "回复 1，并从灵宝碎片重铸 1 张水卡；没有水碎片则抽 1 水。",
+    "element": "water",
+    "filename": "water-10.jpg"
+  },
+  {
+    "name": "木舟暗渡",
+    "type": "counter",
+    "value": 1,
+    "text": "反击陷阱。对方攻击木空槽时，水生木补入木攻击卡并 +2 灵力。",
+    "element": "water",
+    "filename": "water-11.jpg"
+  },
+  {
+    "name": "潮汐回手",
+    "type": "defense",
+    "value": 1,
+    "text": "抵消 1；触发后从灵宝碎片重铸 1 张同属性卡。",
+    "element": "water",
+    "filename": "water-12.jpg"
+  },
+  {
+    "name": "冰河滤卷",
+    "type": "heal",
+    "value": 2,
+    "text": "回复 2。可焚化 1 手牌，定向抽 2 张水卡。",
+    "element": "water",
+    "filename": "water-13.jpg"
+  },
+  {
+    "name": "水木生门",
+    "type": "ongoing",
+    "value": 3,
+    "text": "准备阶段若木槽为空，补 1 张木系手牌；若木槽有卡，则木槽 +1 灵力。",
+    "element": "water",
+    "filename": "water-14.jpg"
+  },
+  {
+    "name": "沉珠归海",
+    "type": "destroy",
+    "value": 1,
+    "text": "将敌方低灵力卡化为灵宝碎片；若目标为火，回复 1 并抽水。",
+    "element": "water",
+    "filename": "water-15.jpg"
+  },
+  {
+    "name": "逆浪吞焰",
+    "type": "attack",
+    "value": 2,
+    "text": "水克火。击破火系目标后，从灵宝碎片重铸 1 张水卡。",
+    "element": "water",
+    "filename": "water-16.jpg"
+  },
+  {
+    "name": "镜湖藏牌",
+    "type": "counter",
+    "value": 2,
+    "text": "反击陷阱。相生时补阵或抽牌；同源时抽水并下一击 +1。",
+    "element": "water",
+    "filename": "water-17.jpg"
+  },
+  {
+    "name": "归墟拾遗",
+    "type": "heal",
+    "value": 1,
+    "text": "从灵宝碎片选择 1 张卡回手，并回复 1。",
+    "element": "water",
+    "filename": "water-18.jpg"
+  },
+  {
+    "name": "玄冥续潮",
+    "type": "ongoing",
+    "value": 4,
+    "text": "每回合第一次抽定向水卡时，额外抽 1 张随机卡。",
+    "element": "water",
+    "filename": "water-19.jpg"
+  },
+  {
+    "name": "太极玄门",
+    "type": "eye",
+    "value": 0,
+    "text": "五行俱全触发离火焚阵：克制攻击溢出额外 +1。",
+    "element": "fire",
+    "filename": "eye-01.jpg"
+  },
+  {
+    "name": "五气朝元",
+    "type": "eye",
+    "value": 0,
+    "text": "五行俱全触发万木生息：相生发动后己方最低灵力卡 +1。",
+    "element": "wood",
+    "filename": "eye-02.jpg"
+  },
+  {
+    "name": "太白剑台",
+    "type": "eye",
+    "value": 0,
+    "text": "五行俱全触发五行归刃：攻击击破后追加 1 点生命伤害。",
+    "element": "metal",
+    "filename": "eye-03.jpg"
+  },
+  {
+    "name": "后土灵坛",
+    "type": "eye",
+    "value": 0,
+    "text": "五行俱全触发厚土镇岳：本次发动后己方最低灵力卡 +1。",
+    "element": "earth",
+    "filename": "eye-04.jpg"
+  },
+  {
+    "name": "玄冥水府",
+    "type": "eye",
+    "value": 0,
+    "text": "五行俱全触发沧浪回天：首次爆发后回复 2 生命。",
+    "element": "water",
+    "filename": "eye-05.jpg"
+  }
+]

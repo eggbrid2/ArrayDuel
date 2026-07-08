@@ -1,7 +1,11 @@
 .DS_Store
 ._*
+__pycache__/
+*.pyc
 node_modules/
 dist/
 build/
 .env
 .env.*
+web/assets/cards/sheets/
+web/assets/cards/booster-preview.jpg

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="2560" viewBox="0 0 1440 2560" role="img" aria-label="Array Duel ink landscape battlefield background">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eef1e2"/>
+      <stop offset=".35" stop-color="#e4eadc"/>
+      <stop offset=".68" stop-color="#d8e0d1"/>
+      <stop offset="1" stop-color="#cfd8ca"/>
+    </linearGradient>
+    <linearGradient id="skyMist" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c7d8d4" stop-opacity=".72"/>
+      <stop offset=".5" stop-color="#eaf0e5" stop-opacity=".58"/>
+      <stop offset="1" stop-color="#f5f0df" stop-opacity=".18"/>
+    </linearGradient>
+    <linearGradient id="table" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cfd9ca" stop-opacity=".2"/>
+      <stop offset=".45" stop-color="#6f9083" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#263b36" stop-opacity=".42"/>
+    </linearGradient>
+    <radialGradient id="jadeGlow" cx="50%" cy="52%" r="65%">
+      <stop offset="0" stop-color="#f8f1d5" stop-opacity=".5"/>
+      <stop offset=".44" stop-color="#93bda9" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#16201d" stop-opacity=".18"/>
+    </radialGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="paperNoise">
+      <feTurbulence type="fractalNoise" baseFrequency=".012 .036" numOctaves="4" seed="17"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .16"/>
+      </feComponentTransfer>
+    </filter>
+    <path id="mistLine" d="M-60 0 C120 -42 232 38 410 4 C600 -32 735 30 920 -2 C1120 -38 1274 28 1500 -14"/>
+  </defs>
+
+  <rect width="1440" height="2560" fill="url(#paper)"/>
+  <rect width="1440" height="2560" filter="url(#paperNoise)" opacity=".34"/>
+  <rect width="1440" height="980" fill="url(#skyMist)"/>
+
+  <g opacity=".72" filter="url(#soft)">
+    <path d="M-80 458 C62 290 150 236 246 346 C340 452 390 256 506 182 C606 118 672 294 744 358 C804 412 898 230 1010 178 C1136 118 1208 294 1300 342 C1392 390 1448 270 1520 226 L1520 796 L-80 796 Z" fill="#89aaa4" opacity=".4"/>
+    <path d="M-100 626 C38 474 180 402 310 478 C430 548 464 408 590 346 C724 280 780 474 900 512 C1030 554 1092 386 1234 338 C1346 300 1428 420 1528 478 L1528 908 L-100 908 Z" fill="#4f756f" opacity=".34"/>
+    <path d="M-80 746 C120 604 278 650 420 576 C558 504 668 704 820 646 C990 580 1044 518 1214 604 C1328 662 1414 604 1520 556 L1520 1030 L-80 1030 Z" fill="#2f534f" opacity=".22"/>
+  </g>
+
+  <g opacity=".42">
+    <use href="#mistLine" x="0" y="525" stroke="#f8f3df" stroke-width="46" fill="none"/>
+    <use href="#mistLine" x="-110" y="706" stroke="#f5f2e4" stroke-width="58" fill="none" opacity=".86"/>
+    <use href="#mistLine" x="80" y="910" stroke="#edf1e7" stroke-width="66" fill="none" opacity=".62"/>
+  </g>
+
+  <g opacity=".28" stroke-linecap="round" fill="none">
+    <path d="M54 864 C110 784 138 690 126 580" stroke="#243d37" stroke-width="18"/>
+    <path d="M126 626 C82 630 50 650 20 690" stroke="#243d37" stroke-width="12"/>
+    <path d="M132 676 C190 656 232 678 272 724" stroke="#243d37" stroke-width="12"/>
+    <path d="M1328 892 C1288 766 1308 654 1372 548" stroke="#243d37" stroke-width="16"/>
+    <path d="M1344 644 C1296 638 1254 660 1214 708" stroke="#243d37" stroke-width="11"/>
+    <path d="M1336 730 C1394 716 1442 740 1490 798" stroke="#243d37" stroke-width="11"/>
+  </g>
+
+  <rect y="760" width="1440" height="1800" fill="url(#jadeGlow)"/>
+  <rect y="1080" width="1440" height="1480" fill="url(#table)"/>
+
+  <g opacity=".24" fill="none">
+    <ellipse cx="720" cy="1518" rx="520" ry="172" stroke="#d5b96d" stroke-width="3"/>
+    <ellipse cx="720" cy="1518" rx="392" ry="124" stroke="#376b62" stroke-width="2"/>
+    <ellipse cx="720" cy="1518" rx="238" ry="72" stroke="#e7d59a" stroke-width="2"/>
+    <path d="M214 1518 H1226 M720 1346 V1690 M354 1412 L1086 1624 M1086 1412 L354 1624" stroke="#d4be78" stroke-width="2"/>
+  </g>
+
+  <g opacity=".34" filter="url(#soft)">
+    <circle cx="144" cy="1250" r="170" fill="#427d63" opacity=".16"/>
+    <circle cx="1276" cy="1170" r="196" fill="#b45543" opacity=".12"/>
+    <circle cx="180" cy="2040" r="260" fill="#3f86ad" opacity=".14"/>
+    <circle cx="1250" cy="2060" r="260" fill="#c7ae6d" opacity=".15"/>
+  </g>
+
+  <g opacity=".2" stroke-linecap="round" fill="none">
+    <path d="M58 1800 C220 1732 376 1764 548 1710" stroke="#e1d6a2" stroke-width="8"/>
+    <path d="M912 1772 C1090 1696 1248 1730 1398 1662" stroke="#b7cfd0" stroke-width="8"/>
+    <path d="M146 2254 C338 2170 504 2204 694 2142" stroke="#95b68d" stroke-width="7"/>
+  </g>
+
+  <rect width="1440" height="2560" fill="none" stroke="#f7efd8" stroke-opacity=".24" stroke-width="38"/>
+  <rect width="1440" height="2560" fill="url(#paper)" opacity=".08"/>
+</svg>
