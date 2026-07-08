@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=141" />
+    <link rel="stylesheet" href="./styles.css?v=142" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -282,6 +282,72 @@
       </section>
     </main>
 
+    <section id="deckPage" class="deck-page" hidden aria-label="整理卡组页面">
+      <div class="deck-page-shell">
+        <div class="deck-editor-topbar">
+          <div class="deck-title-block">
+            <h2>整理卡组</h2>
+            <p id="deckSummary" class="trigger-text">登录后可整理卡组。</p>
+          </div>
+          <div class="deck-icon-actions">
+            <button id="toggleDeckFilters" class="deck-icon-button" type="button" aria-label="筛选" aria-expanded="false" aria-controls="deckFilterPanel">
+              <span aria-hidden="true">筛</span>
+            </button>
+            <button id="refreshDeck" class="deck-icon-button" type="button" aria-label="刷新资产">
+              <span aria-hidden="true">↻</span>
+            </button>
+            <button id="closeDeckPage" class="deck-icon-button" type="button" aria-label="返回首页">
+              <span aria-hidden="true">←</span>
+            </button>
+          </div>
+        </div>
+        <div class="deck-compact-row">
+          <div id="deckStatus" class="deck-status">卡组 0/50</div>
+          <span id="deckFilterLabel" class="deck-filter-label">全部 / 全部类型</span>
+        </div>
+        <div class="deck-filter-popover">
+          <div id="deckFilterPanel" class="deck-filter-panel" hidden>
+            <div class="deck-filter-panel-head">
+              <strong>卡牌筛选</strong>
+              <button id="closeDeckFilters" type="button" aria-label="关闭筛选">×</button>
+            </div>
+            <div class="deck-filters" aria-label="属性筛选">
+              <button type="button" class="active" data-deck-filter="element" data-value="all">全部</button>
+              <button type="button" data-deck-filter="element" data-value="wood">木</button>
+              <button type="button" data-deck-filter="element" data-value="fire">火</button>
+              <button type="button" data-deck-filter="element" data-value="earth">土</button>
+              <button type="button" data-deck-filter="element" data-value="metal">金</button>
+              <button type="button" data-deck-filter="element" data-value="water">水</button>
+              <button type="button" data-deck-filter="element" data-value="core">阵眼</button>
+            </div>
+            <div class="deck-filters deck-type-filters" aria-label="类型筛选">
+              <button type="button" class="active" data-deck-filter="type" data-value="all">全部类型</button>
+              <button type="button" data-deck-filter="type" data-value="attack">攻击</button>
+              <button type="button" data-deck-filter="type" data-value="defense">防反</button>
+              <button type="button" data-deck-filter="type" data-value="heal">回复</button>
+              <button type="button" data-deck-filter="type" data-value="ongoing">永续</button>
+              <button type="button" data-deck-filter="type" data-value="destroy">销毁</button>
+            </div>
+          </div>
+        </div>
+        <div class="deck-builder">
+          <div class="deck-view-tabs" role="tablist" aria-label="卡组编辑区">
+            <button type="button" class="active" data-deck-tab="deck">卡组内</button>
+            <button type="button" data-deck-tab="owned">我的收藏</button>
+            <button type="button" data-deck-tab="pack">补充包池</button>
+          </div>
+          <section class="deck-pane deck-pane-active">
+            <div class="deck-pane-head">
+              <strong id="deckPaneTitle">当前卡组</strong>
+              <span id="deckPaneSummary">0 张</span>
+            </div>
+            <div id="deckTabActions" class="deck-tab-actions" aria-label="当前操作"></div>
+            <div id="deckCardGrid" class="collection-grid deck-card-list"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
     <section id="resultScreen" class="result-screen" hidden aria-live="polite">
       <div class="result-panel result-victory" id="victoryResult" hidden>
         <span class="result-kicker">Victory</span>
@@ -447,61 +513,6 @@
       </form>
     </dialog>
 
-    <dialog id="deckDialog">
-      <form method="dialog">
-        <h2>整理卡组</h2>
-        <p id="deckSummary" class="trigger-text">登录后可整理卡组。</p>
-        <div id="deckStatus" class="deck-status">卡组 0/50</div>
-        <div class="deck-filter-popover">
-          <button id="toggleDeckFilters" class="deck-filter-toggle" type="button" aria-expanded="false" aria-controls="deckFilterPanel">
-            <span id="deckFilterLabel">筛选：全部 / 全部类型</span>
-          </button>
-          <div id="deckFilterPanel" class="deck-filter-panel" hidden>
-            <div class="deck-filter-panel-head">
-              <strong>卡牌筛选</strong>
-              <button id="closeDeckFilters" type="button" aria-label="关闭筛选">×</button>
-            </div>
-            <div class="deck-filters" aria-label="属性筛选">
-              <button type="button" class="active" data-deck-filter="element" data-value="all">全部</button>
-              <button type="button" data-deck-filter="element" data-value="wood">木</button>
-              <button type="button" data-deck-filter="element" data-value="fire">火</button>
-              <button type="button" data-deck-filter="element" data-value="earth">土</button>
-              <button type="button" data-deck-filter="element" data-value="metal">金</button>
-              <button type="button" data-deck-filter="element" data-value="water">水</button>
-              <button type="button" data-deck-filter="element" data-value="core">阵眼</button>
-            </div>
-            <div class="deck-filters deck-type-filters" aria-label="类型筛选">
-              <button type="button" class="active" data-deck-filter="type" data-value="all">全部类型</button>
-              <button type="button" data-deck-filter="type" data-value="attack">攻击</button>
-              <button type="button" data-deck-filter="type" data-value="defense">防反</button>
-              <button type="button" data-deck-filter="type" data-value="heal">回复</button>
-              <button type="button" data-deck-filter="type" data-value="ongoing">永续</button>
-              <button type="button" data-deck-filter="type" data-value="destroy">销毁</button>
-            </div>
-          </div>
-        </div>
-        <div class="deck-builder">
-          <div class="deck-view-tabs" role="tablist" aria-label="卡组编辑区">
-            <button type="button" class="active" data-deck-tab="deck">卡组内</button>
-            <button type="button" data-deck-tab="owned">我的收藏</button>
-            <button type="button" data-deck-tab="pack">补充包池</button>
-          </div>
-          <section class="deck-pane deck-pane-active">
-            <div class="deck-pane-head">
-              <strong id="deckPaneTitle">当前卡组</strong>
-              <span id="deckPaneSummary">0 张</span>
-            </div>
-            <div id="deckTabActions" class="deck-tab-actions" aria-label="当前操作"></div>
-            <div id="deckCardGrid" class="collection-grid deck-card-list"></div>
-          </section>
-        </div>
-        <div class="target-list deck-footer-actions">
-          <button id="refreshDeck" type="button">刷新</button>
-          <button class="secondary" type="submit">关闭</button>
-        </div>
-      </form>
-    </dialog>
-
     <dialog id="shopDialog">
       <form method="dialog">
         <h2>商店</h2>
@@ -522,11 +533,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=141"></script>
+    <script src="./app.js?v=142"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=141").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=142").catch(() => {});
         });
       }
     </script>

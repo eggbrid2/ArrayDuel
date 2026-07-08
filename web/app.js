@@ -4875,17 +4875,37 @@ function openDeckDialog() {
     openAuthDialog();
     return;
   }
-  const dialog = document.querySelector("#deckDialog");
+  const deckPage = document.querySelector("#deckPage");
+  const startScreen = document.querySelector("#startScreen");
+  const gameShell = document.querySelector("#gameShell");
+  const resultScreen = document.querySelector("#resultScreen");
   playerDataState.deckDraft = { ...(playerDataState.profile?.deck || initialDeckMap()) };
+  if (startScreen) startScreen.hidden = true;
+  if (gameShell) gameShell.hidden = true;
+  if (resultScreen) resultScreen.hidden = true;
+  if (deckPage) deckPage.hidden = false;
+  document.body.classList.remove("start-mode");
+  document.body.classList.add("deck-page-mode");
   renderPlayerDataState();
   renderDeckBuilder();
-  dialog?.showModal();
   loadPlayerProfile().then(() => {
     playerDataState.deckDraft = { ...(playerDataState.profile?.deck || initialDeckMap()) };
     renderDeckBuilder();
   }).catch(() => {
     showToast("卡组资产读取失败。", "log-destroy", "minor");
   });
+}
+
+function closeDeckPage() {
+  const deckPage = document.querySelector("#deckPage");
+  const startScreen = document.querySelector("#startScreen");
+  const gameShell = document.querySelector("#gameShell");
+  if (deckPage) deckPage.hidden = true;
+  if (gameShell) gameShell.hidden = true;
+  if (startScreen) startScreen.hidden = false;
+  document.body.classList.add("start-mode");
+  document.body.classList.remove("deck-page-mode");
+  setDeckFilterPanel(false);
 }
 
 function openShopDialog() {
@@ -5221,12 +5241,13 @@ function initPlayerDataUi() {
     setDeckFilterPanel(Boolean(panel?.hidden));
   });
   document.querySelector("#closeDeckFilters")?.addEventListener("click", () => setDeckFilterPanel(false));
-  document.querySelector("#deckDialog")?.addEventListener("click", (event) => {
+  document.querySelector("#deckPage")?.addEventListener("click", (event) => {
     const popover = document.querySelector(".deck-filter-popover");
     const panel = document.querySelector("#deckFilterPanel");
     if (panel?.hidden || popover?.contains(event.target)) return;
     setDeckFilterPanel(false);
   });
+  document.querySelector("#closeDeckPage")?.addEventListener("click", closeDeckPage);
   document.querySelectorAll("[data-deck-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       switchDeckTab(button.dataset.deckTab || "deck");
