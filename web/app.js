@@ -167,6 +167,7 @@ const DEFAULT_AI_CONFIG = {
 };
 const AUTH_ENDPOINT = "./auth.php";
 const VICTORY_MESSAGES_ENDPOINT = "./victory-messages.php";
+const PLAYER_DATA_ENDPOINT = "./auth.php";
 const DEFEAT_TAUNTS = [
   "你这阵法松得像没结印，连我的起手式都没逼出来。",
   "六个槽位摆成这样，五行看了都想改名。",
@@ -292,6 +293,44 @@ const eyePool = [
   { name: "玄冥水府", element: "water", type: "eye", value: 0, text: "五行俱全触发沧浪回天：首次爆发后回复 2 生命。" },
 ];
 
+function plainCard(card, element = card.element || "core") {
+  return {
+    name: card.name,
+    element,
+    type: card.type,
+    value: card.value,
+    text: card.text,
+  };
+}
+
+function allCollectibleCards() {
+  return [
+    ...FIVE.flatMap((element) => cardPool[element].map((card) => plainCard(card, element))),
+    ...eyePool.map((card) => plainCard(card, card.element || "core")),
+  ];
+}
+
+function initialCollectionCards() {
+  return [
+    ...FIVE.flatMap((element) => cardPool[element].slice(0, 9).map((card) => plainCard(card, element))),
+    ...eyePool.map((card) => plainCard(card, card.element || "core")),
+  ];
+}
+
+function collectibleKey(card) {
+  return `${card.element || "core"}:${card.name}`;
+}
+
+function cardByKey(key) {
+  const catalog = allCollectibleCards();
+  return catalog.find((card) => collectibleKey(card) === key) || null;
+}
+
+function drawBoosterCards(count = 5) {
+  const catalog = allCollectibleCards();
+  return Array.from({ length: count }, () => catalog[Math.floor(Math.random() * catalog.length)]);
+}
+
 const state = {
   round: 1,
   active: "player",
@@ -330,6 +369,11 @@ const aiState = {
 const authState = {
   user: null,
   mode: "login",
+};
+
+const playerDataState = {
+  profile: null,
+  loading: false,
 };
 
 function createSide(name) {
@@ -3460,6 +3504,7 @@ function showResultScreen(result) {
     const taunt = document.querySelector("#defeatTaunt");
     if (taunt) taunt.textContent = DEFEAT_TAUNTS[Math.floor(Math.random() * DEFEAT_TAUNTS.length)];
   } else {
+    awardVictoryStones();
     const form = document.querySelector("#victoryMessageForm");
     const panel = document.querySelector("#victoryMessagesPanel");
     if (form) form.hidden = false;
@@ -4259,9 +4304,162 @@ document.querySelector("#tutorialHelpBtn")?.addEventListener("click", () => show
 window.addEventListener("resize", () => renderTutorialGuide());
 window.addEventListener("scroll", () => renderTutorialGuide(), true);
 
+function collectionCount(profile = playerDataState.profile) {
+  if (!profile?.collection) return 0;
+  return Object.values(profile.collection).reduce((sum, count) => sum + Number(count || 0), 0);
+}
+
+function renderPlayerDataState() {
+  const actions = document.querySelectorAll(".account-action");
+  actions.forEach((button) => {
+    button.hidden = !authState.user;
+  });
+  const deckSummary = document.querySelector("#deckSummary");
+  const shopSummary = document.querySelector("#shopSummary");
+  const profile = playerDataState.profile;
+  if (deckSummary) {
+    deckSummary.textContent = profile
+      ? `收藏 ${collectionCount(profile)} 张 · 胜场 ${profile.wins || 0} · 灵石 ${profile.stones || 0}`
+      : "登录后可查看初始卡组。";
+  }
+  if (shopSummary) {
+    shopSummary.textContent = profile
+      ? `当前灵石 ${profile.stones || 0} · 已开包 ${profile.packsOpened || 0}`
+      : "登录后可使用灵石抽卡。";
+  }
+  const buyButton = document.querySelector("#buyBoosterBtn");
+  if (buyButton) buyButton.disabled = !profile || Number(profile.stones || 0) < 100;
+}
+
+async function requestPlayerData(action = "playerStatus", payload = {}) {
+  const response = await fetch(`${PLAYER_DATA_ENDPOINT}?action=${encodeURIComponent(action)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      initialCards: initialCollectionCards(),
+      ...payload,
+    }),
+    cache: "no-store",
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "资产请求失败");
+  playerDataState.profile = data.profile || null;
+  renderPlayerDataState();
+  return data;
+}
+
+async function loadPlayerProfile() {
+  if (!authState.user) {
+    playerDataState.profile = null;
+    renderPlayerDataState();
+    return null;
+  }
+  playerDataState.loading = true;
+  try {
+    return await requestPlayerData("playerStatus");
+  } finally {
+    playerDataState.loading = false;
+  }
+}
+
+function renderCollection(container, collection) {
+  if (!container) return;
+  container.innerHTML = "";
+  const entries = Object.entries(collection || {}).sort(([a], [b]) => a.localeCompare(b, "zh-CN"));
+  if (!entries.length) {
+    container.innerHTML = `<p class="trigger-text">还没有卡牌。</p>`;
+    return;
+  }
+  entries.forEach(([key, count]) => {
+    const card = cardByKey(key) || { name: key.split(":").slice(1).join(":") || key, element: key.split(":")[0] || "core", type: "", value: 0, text: "" };
+    const art = cardArtUrl(card);
+    const item = document.createElement("article");
+    item.className = "collection-card";
+    item.style.setProperty("--slot-color", COLOR[card.element] || "#e5c574");
+    if (art) item.style.setProperty("--card-art", `url("${art}")`);
+    item.innerHTML = `
+      <span>${LABEL[card.element] || "中"}</span>
+      <strong>${escapeHtml(card.name)}</strong>
+      <em>${TYPE[card.type] || "卡"}${card.value ? ` · 灵力 ${card.value}` : ""}</em>
+      ${art ? '<i></i>' : ""}
+      <b>x${Number(count || 0)}</b>
+    `;
+    container.append(item);
+  });
+}
+
+function renderBoosterResult(cards) {
+  const result = document.querySelector("#boosterResult");
+  if (!result) return;
+  result.hidden = false;
+  const grouped = {};
+  cards.forEach((card) => {
+    grouped[collectibleKey(card)] = (grouped[collectibleKey(card)] || 0) + 1;
+  });
+  renderCollection(result, grouped);
+}
+
+function openDeckDialog() {
+  if (!authState.user) {
+    openAuthDialog();
+    return;
+  }
+  const dialog = document.querySelector("#deckDialog");
+  const collection = document.querySelector("#deckCollection");
+  renderCollection(collection, playerDataState.profile?.collection || {});
+  renderPlayerDataState();
+  dialog?.showModal();
+  loadPlayerProfile().then(() => renderCollection(collection, playerDataState.profile?.collection || {})).catch(() => {
+    showToast("卡组资产读取失败。", "log-destroy", "minor");
+  });
+}
+
+function openShopDialog() {
+  if (!authState.user) {
+    openAuthDialog();
+    return;
+  }
+  const result = document.querySelector("#boosterResult");
+  if (result) result.hidden = true;
+  renderPlayerDataState();
+  document.querySelector("#shopDialog")?.showModal();
+  loadPlayerProfile().catch(() => showToast("商店资产读取失败。", "log-destroy", "minor"));
+}
+
+async function buyBoosterPack() {
+  const button = document.querySelector("#buyBoosterBtn");
+  if (!authState.user) {
+    openAuthDialog();
+    return;
+  }
+  const cards = drawBoosterCards(5);
+  if (button) button.disabled = true;
+  try {
+    const data = await requestPlayerData("buyBooster", { cards });
+    renderBoosterResult(data.cards || cards);
+    showToast("补充卡包已打开，获得 5 张卡。", "log-burst");
+  } catch (error) {
+    showToast(error.message || "开包失败。", "log-destroy", "minor");
+  } finally {
+    renderPlayerDataState();
+  }
+}
+
+async function awardVictoryStones() {
+  if (!authState.user) return;
+  try {
+    const data = await requestPlayerData("awardVictory");
+    showToast(`胜利奖励 +${data.reward || 100} 灵石。`, "log-burst");
+  } catch {
+    showToast("胜利奖励暂未保存，请稍后再试。", "log-destroy", "minor");
+  }
+}
+
 function authLabel() {
   if (!authState.user) return "游客模式";
-  return `${authState.user.nickname} · ${authState.user.phoneTail}`;
+  const profile = playerDataState.profile;
+  const stones = profile ? ` · 灵石 ${profile.stones || 0}` : "";
+  return `${authState.user.nickname} · ${authState.user.phoneTail}${stones}`;
 }
 
 function renderAuthState() {
@@ -4278,6 +4476,7 @@ function renderAuthState() {
     ? `当前账号：${authState.user.nickname}（尾号 ${authState.user.phoneTail}）`
     : "当前为游客模式。";
   if (logoutButton) logoutButton.hidden = !authState.user;
+  renderPlayerDataState();
 }
 
 function setAuthMode(mode) {
@@ -4306,6 +4505,11 @@ async function requestAuth(action, payload = {}) {
   if (!response.ok) throw new Error(data.error || "账号请求失败");
   authState.user = data.user || null;
   renderAuthState();
+  if (authState.user) loadPlayerProfile().catch(() => renderPlayerDataState());
+  else {
+    playerDataState.profile = null;
+    renderPlayerDataState();
+  }
   return data;
 }
 
@@ -4369,6 +4573,8 @@ function initStartScreen() {
   const startScreen = document.querySelector("#startScreen");
   const gameShell = document.querySelector("#gameShell");
   const startButton = document.querySelector("#startGameBtn");
+  const deckButton = document.querySelector("#deckBuilderBtn");
+  const shopButton = document.querySelector("#shopBtn");
   const tutorialButton = document.querySelector("#tutorialBtn");
   const startRulesButton = document.querySelector("#startRulesBtn");
   const startAiButton = document.querySelector("#startAiBtn");
@@ -4391,6 +4597,8 @@ function initStartScreen() {
   };
 
   startButton?.addEventListener("click", () => beginGame("normal"));
+  deckButton?.addEventListener("click", openDeckDialog);
+  shopButton?.addEventListener("click", openShopDialog);
   tutorialButton?.addEventListener("click", () => beginGame("tutorial"));
   startRulesButton?.addEventListener("click", () => rulesDialog?.showModal());
   rulesButton?.addEventListener("click", () => rulesDialog?.showModal());
@@ -4531,6 +4739,28 @@ function initResultScreen() {
   defeatRestart?.addEventListener("click", restartFromResult);
 }
 
+function initPlayerDataUi() {
+  document.querySelector("#refreshDeck")?.addEventListener("click", async () => {
+    try {
+      await loadPlayerProfile();
+      renderCollection(document.querySelector("#deckCollection"), playerDataState.profile?.collection || {});
+      showToast("卡组资产已刷新。", "log-phase", "minor");
+    } catch {
+      showToast("刷新失败。", "log-destroy", "minor");
+    }
+  });
+  document.querySelector("#refreshShop")?.addEventListener("click", async () => {
+    try {
+      await loadPlayerProfile();
+      showToast("商店资产已刷新。", "log-phase", "minor");
+    } catch {
+      showToast("刷新失败。", "log-destroy", "minor");
+    }
+  });
+  document.querySelector("#buyBoosterBtn")?.addEventListener("click", buyBoosterPack);
+  renderPlayerDataState();
+}
+
 function initAiSettings() {
   const openButton = document.querySelector("#aiSettingsBtn");
   const dialog = document.querySelector("#aiDialog");
@@ -4621,6 +4851,7 @@ function initMusic() {
 }
 
 initAuth();
+initPlayerDataUi();
 initAiSettings();
 initStartScreen();
 initResultScreen();

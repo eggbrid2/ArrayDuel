@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=134" />
+    <link rel="stylesheet" href="./styles.css?v=135" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -149,6 +149,8 @@
           <div id="startAccountStatus" class="account-status">游客模式</div>
           <button id="startGameBtn" class="primary-action" type="button">开始游戏</button>
           <button id="startAuthBtn" class="secondary-action" type="button">登录 / 注册</button>
+          <button id="deckBuilderBtn" class="secondary-action account-action" type="button" hidden>整理卡组</button>
+          <button id="shopBtn" class="secondary-action account-action" type="button" hidden>商店</button>
           <button id="tutorialBtn" class="secondary-action" type="button">新手关卡</button>
           <button id="startRulesBtn" class="secondary-action" type="button">游戏规则</button>
           <button id="startAiBtn" class="secondary-action" type="button">AI 设置</button>
@@ -419,14 +421,43 @@
       </form>
     </dialog>
 
+    <dialog id="deckDialog">
+      <form method="dialog">
+        <h2>整理卡组</h2>
+        <p id="deckSummary" class="trigger-text">登录后可查看初始卡组。</p>
+        <div id="deckCollection" class="collection-grid"></div>
+        <div class="target-list">
+          <button id="refreshDeck" type="button">刷新</button>
+          <button class="secondary" type="submit">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="shopDialog">
+      <form method="dialog">
+        <h2>商店</h2>
+        <p id="shopSummary" class="trigger-text">灵石 0</p>
+        <div class="shop-item">
+          <strong>补充卡卡包</strong>
+          <span>100 灵石 / 次，打开获得 5 张卡。</span>
+          <button id="buyBoosterBtn" type="button">抽 1 包</button>
+        </div>
+        <div id="boosterResult" class="collection-grid booster-result" hidden></div>
+        <div class="target-list">
+          <button id="refreshShop" type="button">刷新资产</button>
+          <button class="secondary" type="submit">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=134"></script>
+    <script src="./app.js?v=135"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=134").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=135").catch(() => {});
         });
       }
     </script>

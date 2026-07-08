@@ -162,6 +162,13 @@ button:disabled {
   font-weight: 800;
 }
 
+.account-action {
+  border-color: rgba(247, 213, 108, 0.38);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(247, 213, 108, 0.2), transparent 5rem),
+    linear-gradient(160deg, rgba(62, 86, 64, 0.92), rgba(24, 32, 29, 0.94));
+}
+
 .primary-action,
 .secondary-action {
   width: 100%;
@@ -2178,6 +2185,110 @@ dialog h2::before {
     linear-gradient(160deg, rgba(63, 66, 61, 0.72), rgba(21, 24, 23, 0.9));
   color: rgba(255, 253, 247, 0.62);
   box-shadow: none;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 8px;
+  max-height: min(46svh, 420px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.collection-card {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  min-height: 112px;
+  padding: 9px;
+  border: 1px solid color-mix(in srgb, var(--slot-color, #e5c574) 44%, rgba(255, 253, 247, 0.22));
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.9), rgba(231, 224, 205, 0.9));
+  color: #1a1d18;
+  overflow: hidden;
+}
+
+.collection-card span,
+.collection-card b {
+  justify-self: start;
+  min-width: 28px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--slot-color, #e5c574) 30%, #fffdf7);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.collection-card strong {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.collection-card em {
+  position: relative;
+  z-index: 1;
+  color: rgba(24, 32, 29, 0.72);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.collection-card i {
+  position: absolute;
+  inset: auto 8px 8px auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: var(--card-art) center / cover;
+  opacity: 0.82;
+}
+
+.collection-card b {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 2;
+}
+
+.shop-item {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(229, 197, 116, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.08);
+}
+
+.shop-item strong {
+  color: #f7d56c;
+  font-size: 18px;
+}
+
+.shop-item span {
+  color: rgba(255, 253, 247, 0.76);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.shop-item button {
+  min-height: 44px;
+  border: 1px solid rgba(247, 213, 108, 0.54);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffe69d, #b98535);
+  color: #17140c;
+  font-weight: 950;
+}
+
+.shop-item button:disabled {
+  opacity: 0.55;
+}
+
+.booster-result {
+  max-height: none;
 }
 
 .secondary {

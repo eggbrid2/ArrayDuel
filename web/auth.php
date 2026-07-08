@@ -15,6 +15,7 @@ session_start();
 $dataDir = __DIR__ . '/data';
 $usersFile = $dataDir . '/users.json';
 $invitesFile = $dataDir . '/invite-codes.json';
+$profilesFile = $dataDir . '/player-data.json';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
@@ -35,6 +36,53 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $payload = json_decode(file_get_contents('php://input') ?: '', true);
 if (!is_array($payload)) {
     fail(400, 'Invalid JSON');
+}
+
+if ($action === 'playerStatus') {
+    $userId = currentUserIdRaw($usersFile);
+    if ($userId === '') fail(401, '需要先登录');
+    $profiles = readProfiles($profilesFile);
+    $profile = ensurePlayerProfile($profiles, $userId, $payload);
+    writeProfiles($profilesFile, $profiles);
+    echo json_encode(['profile' => publicPlayerProfile($profile)], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($action === 'awardVictory') {
+    $userId = currentUserIdRaw($usersFile);
+    if ($userId === '') fail(401, '需要先登录');
+    $profiles = readProfiles($profilesFile);
+    $profile = ensurePlayerProfile($profiles, $userId, $payload);
+    $profile['stones'] = max(0, (int)($profile['stones'] ?? 0)) + 100;
+    $profile['wins'] = max(0, (int)($profile['wins'] ?? 0)) + 1;
+    $profile['updatedAt'] = gmdate('c');
+    $profiles[$userId] = $profile;
+    writeProfiles($profilesFile, $profiles);
+    echo json_encode(['profile' => publicPlayerProfile($profile), 'reward' => 100], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($action === 'buyBooster') {
+    $userId = currentUserIdRaw($usersFile);
+    if ($userId === '') fail(401, '需要先登录');
+    $profiles = readProfiles($profilesFile);
+    $profile = ensurePlayerProfile($profiles, $userId, $payload);
+    $cards = $payload['cards'] ?? [];
+    if (!is_array($cards) || count($cards) !== 5) fail(422, '卡包必须包含 5 张卡');
+    if ((int)($profile['stones'] ?? 0) < 100) fail(422, '灵石不足');
+
+    $profile['stones'] = (int)$profile['stones'] - 100;
+    foreach ($cards as $card) {
+        $key = playerCardKey($card);
+        if ($key === '') fail(422, '卡牌数据不完整');
+        $profile['collection'][$key] = max(0, (int)($profile['collection'][$key] ?? 0)) + 1;
+    }
+    $profile['packsOpened'] = max(0, (int)($profile['packsOpened'] ?? 0)) + 1;
+    $profile['updatedAt'] = gmdate('c');
+    $profiles[$userId] = $profile;
+    writeProfiles($profilesFile, $profiles);
+    echo json_encode(['profile' => publicPlayerProfile($profile), 'cards' => $cards], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 if ($action === 'register') {
@@ -125,6 +173,17 @@ function currentUser(string $usersFile): ?array
     return null;
 }
 
+function currentUserIdRaw(string $usersFile): string
+{
+    $userId = (string)($_SESSION['user_id'] ?? '');
+    if ($userId === '') return '';
+    foreach (readJsonList($usersFile) as $user) {
+        if ((string)($user['id'] ?? '') === $userId) return $userId;
+    }
+    unset($_SESSION['user_id']);
+    return '';
+}
+
 function publicUser(array $user): array
 {
     return [
@@ -181,6 +240,80 @@ function readJsonList(string $file): array
 }
 
 function writeJsonList(string $file, array $data): void
+{
+    $dir = dirname($file);
+    ensureDataDir($dir);
+    if (file_put_contents($file, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), LOCK_EX) === false) {
+        fail(500, 'Save failed');
+    }
+}
+
+function ensurePlayerProfile(array &$profiles, string $userId, array $payload): array
+{
+    $profile = is_array($profiles[$userId] ?? null) ? $profiles[$userId] : [];
+    $changed = false;
+    if (!isset($profile['stones'])) {
+        $profile['stones'] = 100;
+        $changed = true;
+    }
+    if (!isset($profile['wins'])) {
+        $profile['wins'] = 0;
+        $changed = true;
+    }
+    if (!isset($profile['packsOpened'])) {
+        $profile['packsOpened'] = 0;
+        $changed = true;
+    }
+    if (!isset($profile['collection']) || !is_array($profile['collection']) || count($profile['collection']) === 0) {
+        $initialCards = $payload['initialCards'] ?? [];
+        $collection = [];
+        if (is_array($initialCards)) {
+            foreach ($initialCards as $card) {
+                $key = playerCardKey($card);
+                if ($key !== '') $collection[$key] = ($collection[$key] ?? 0) + 1;
+            }
+        }
+        $profile['collection'] = $collection;
+        $profile['createdAt'] = (string)($profile['createdAt'] ?? gmdate('c'));
+        $changed = true;
+    }
+    if ($changed) {
+        $profile['updatedAt'] = gmdate('c');
+        $profiles[$userId] = $profile;
+    }
+    return $profile;
+}
+
+function playerCardKey($card): string
+{
+    if (!is_array($card)) return '';
+    $element = preg_replace('/[^a-z]/', '', (string)($card['element'] ?? ''));
+    $name = trim((string)($card['name'] ?? ''));
+    if ($element === '' || $name === '') return '';
+    return $element . ':' . limitText($name, 40);
+}
+
+function publicPlayerProfile(array $profile): array
+{
+    return [
+        'stones' => max(0, (int)($profile['stones'] ?? 0)),
+        'wins' => max(0, (int)($profile['wins'] ?? 0)),
+        'packsOpened' => max(0, (int)($profile['packsOpened'] ?? 0)),
+        'collection' => is_array($profile['collection'] ?? null) ? $profile['collection'] : [],
+        'updatedAt' => (string)($profile['updatedAt'] ?? ''),
+    ];
+}
+
+function readProfiles(string $file): array
+{
+    if (!is_file($file)) return [];
+    $content = file_get_contents($file);
+    if ($content === false || trim($content) === '') return [];
+    $data = json_decode($content, true);
+    return is_array($data) ? $data : [];
+}
+
+function writeProfiles(string $file, array $data): void
 {
     $dir = dirname($file);
     ensureDataDir($dir);
