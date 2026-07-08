@@ -441,6 +441,7 @@ const playerDataState = {
   profile: null,
   loading: false,
   deckDraft: {},
+  deckSource: "owned",
   deckFilters: {
     element: "all",
     type: "all",
@@ -4489,19 +4490,11 @@ function renderCollection(container, collection) {
   }
   entries.forEach(([key, count]) => {
     const card = cardByKey(key) || { name: key.split(":").slice(1).join(":") || key, element: key.split(":")[0] || "core", type: "", value: 0, text: "" };
-    const art = cardArtUrl(card);
-    const item = document.createElement("article");
-    item.className = "collection-card";
-    item.style.setProperty("--slot-color", COLOR[card.element] || "#e5c574");
-    if (art) item.style.setProperty("--card-art", `url("${art}")`);
-    item.innerHTML = `
-      <span>${LABEL[card.element] || "中"}</span>
-      <strong>${escapeHtml(card.name)}</strong>
-      <em>${TYPE[card.type] || "卡"}${card.value ? ` · 灵力 ${card.value}` : ""}</em>
-      ${art ? '<i></i>' : ""}
-      <b>x${Number(count || 0)}</b>
-    `;
-    container.append(item);
+    container.append(createDeckCardNode(card, {
+      count,
+      note: `${TYPE[card.type] || "卡"}${card.value ? ` · 灵力 ${card.value}` : ""}`,
+      actions: [],
+    }));
   });
 }
 
@@ -4536,6 +4529,7 @@ function renderDeckBuilder() {
   const deckSummary = document.querySelector("#deckSummary");
   const collectionSummary = document.querySelector("#collectionSummary");
   const deckCountSummary = document.querySelector("#deckCountSummary");
+  const sourceTitle = document.querySelector("#deckSourceTitle");
   const saveButton = document.querySelector("#saveDeck");
   const total = countMapTotal(deck);
   const valid = isDeckValid(deck);
@@ -4545,8 +4539,16 @@ function renderDeckBuilder() {
     deckStatus.classList.toggle("valid", valid);
     deckStatus.classList.toggle("invalid", !valid);
   }
-  if (collectionSummary) collectionSummary.textContent = `${collectionCount(profile)} 张`;
+  if (collectionSummary) {
+    collectionSummary.textContent = playerDataState.deckSource === "pack"
+      ? `${allCollectibleCards().length} 种`
+      : `${collectionCount(profile)} 张`;
+  }
   if (deckCountSummary) deckCountSummary.textContent = `${total} 张`;
+  if (sourceTitle) sourceTitle.textContent = playerDataState.deckSource === "pack" ? "补充包池" : "我的收藏";
+  document.querySelectorAll("[data-deck-source]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.deckSource === playerDataState.deckSource);
+  });
   if (saveButton) saveButton.disabled = !valid;
   renderDeckCollection();
   renderDeckCards();
@@ -4558,7 +4560,10 @@ function renderDeckCollection() {
   root.innerHTML = "";
   const collection = playerDataState.profile?.collection || {};
   const deck = currentDeckDraft();
-  const cards = Object.entries(collection)
+  const sourceEntries = playerDataState.deckSource === "pack"
+    ? allCollectibleCards().map((card) => [collectibleKey(card), Number(collection[collectibleKey(card)] || 0)])
+    : Object.entries(collection);
+  const cards = sourceEntries
     .map(([key, count]) => ({ key, count: Number(count || 0), card: cardByKey(key) }))
     .filter((entry) => entry.card && cardMatchesDeckFilters(entry.card))
     .sort((a, b) => a.key.localeCompare(b.key, "zh-CN"));
@@ -4569,12 +4574,25 @@ function renderDeckCollection() {
   cards.forEach(({ key, count, card }) => {
     const inDeck = Number(deck[key] || 0);
     const canAdd = inDeck < count && inDeck < DECK_RULES.maxCopies && countMapTotal(deck) < DECK_RULES.max;
+    const canBulkAdd = availableAddCount(key) > 0;
     root.append(createDeckCardNode(card, {
       count,
       note: `卡组 ${inDeck}/${Math.min(count, DECK_RULES.maxCopies)}`,
-      action: "加入",
-      disabled: !canAdd,
-      onClick: () => addCardToDeck(key),
+      muted: playerDataState.deckSource === "pack" && count <= 0,
+      actions: [
+        {
+          label: "+1",
+          title: "加入 1 张",
+          disabled: !canAdd,
+          onClick: () => addCardToDeck(key),
+        },
+        {
+          label: "加满",
+          title: "加入可用数量",
+          disabled: !canBulkAdd,
+          onClick: () => addMaxCardToDeck(key),
+        },
+      ],
     }));
   });
 }
@@ -4596,8 +4614,18 @@ function renderDeckCards() {
     root.append(createDeckCardNode(card, {
       count,
       note: `${LABEL[card.element] || "中"} · ${TYPE[card.type] || "卡"}`,
-      action: "移除",
-      onClick: () => removeCardFromDeck(key),
+      actions: [
+        {
+          label: "-1",
+          title: "移除 1 张",
+          onClick: () => removeCardFromDeck(key),
+        },
+        {
+          label: "全删",
+          title: "从卡组全部移除",
+          onClick: () => removeAllCardFromDeck(key),
+        },
+      ],
     }));
   });
 }
@@ -4605,32 +4633,92 @@ function renderDeckCards() {
 function createDeckCardNode(card, options) {
   const art = cardArtUrl(card);
   const item = document.createElement("article");
-  item.className = "collection-card";
+  item.className = [
+    "collection-card",
+    "deck-mini-card",
+    options.muted ? "is-muted" : "",
+  ].filter(Boolean).join(" ");
   item.style.setProperty("--slot-color", COLOR[card.element] || "#e5c574");
   if (art) item.style.setProperty("--card-art", `url("${art}")`);
+  const valueText = card.type === "eye" ? "阵眼" : `灵力:${card.value || 0}`;
   item.innerHTML = `
-    <span>${LABEL[card.element] || "中"}</span>
-    <strong>${escapeHtml(card.name)}</strong>
-    <em>${TYPE[card.type] || "卡"}${card.value ? ` · 灵力 ${card.value}` : ""}</em>
+    <button class="deck-card-preview" type="button" aria-label="查看${escapeHtml(card.name)}">
+      <span class="hand-element">${LABEL[card.element] || "中"}</span>
+      <span class="hand-type">${TYPE_MARK[card.type] || "术"}</span>
+      <strong>${escapeHtml(card.name)}</strong>
+      ${art ? '<span class="hand-art"></span>' : ""}
+      <span class="hand-value">${escapeHtml(valueText)}</span>
+      <span class="hand-text">
+        <b>${escapeHtml(cardDeployText(card))}</b>
+      </span>
+      <span class="deck-card-count">x${Number(options.count || 0)}</span>
+    </button>
     <small class="card-count-note">${escapeHtml(options.note || "")}</small>
-    ${art ? '<i></i>' : ""}
-    <b>x${Number(options.count || 0)}</b>
   `;
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = options.action;
-  button.disabled = Boolean(options.disabled);
-  button.addEventListener("click", options.onClick);
-  item.append(button);
+  item.querySelector(".deck-card-preview")?.addEventListener("click", () => showCatalogCardDetail(card, options.note || ""));
+  const actions = document.createElement("div");
+  actions.className = "deck-card-actions";
+  (options.actions || []).forEach((action) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = action.label;
+    if (action.title) button.setAttribute("aria-label", action.title);
+    button.disabled = Boolean(action.disabled);
+    button.addEventListener("click", action.onClick);
+    actions.append(button);
+  });
+  item.append(actions);
   return item;
 }
 
-function addCardToDeck(key) {
+function showCatalogCardDetail(card, note = "") {
+  const art = cardArtUrl(card);
+  const artwork = document.querySelector("#cardArtwork");
+  const meta = [
+    "卡牌图鉴",
+    LABEL[card.element] || "中",
+    TYPE[card.type] || "卡",
+    card.type === "eye" ? "阵眼" : `灵力 ${card.value || 0}`,
+    note,
+  ].filter(Boolean).join(" · ");
+  document.querySelector("#cardTitle").textContent = card.name;
+  artwork.hidden = !art;
+  artwork.style.setProperty("--card-art", art ? `url("${art}")` : "none");
+  document.querySelector("#cardMeta").textContent = meta;
+  document.querySelector("#cardText").innerHTML = cardDetailHtml({
+    card,
+    hp: card.value || 0,
+    stones: 0,
+    mode: card.type,
+  }, false);
+  document.querySelector("#cardDialog").showModal();
+}
+
+function availableAddCount(key) {
   const collectionCountForCard = Number(playerDataState.profile?.collection?.[key] || 0);
   const deck = currentDeckDraft();
   const current = Number(deck[key] || 0);
-  if (current >= collectionCountForCard || current >= DECK_RULES.maxCopies || countMapTotal(deck) >= DECK_RULES.max) return;
+  return Math.max(0, Math.min(
+    collectionCountForCard - current,
+    DECK_RULES.maxCopies - current,
+    DECK_RULES.max - countMapTotal(deck),
+  ));
+}
+
+function addCardToDeck(key) {
+  const add = availableAddCount(key);
+  if (add <= 0) return;
+  const deck = currentDeckDraft();
+  const current = Number(deck[key] || 0);
   deck[key] = current + 1;
+  renderDeckBuilder();
+}
+
+function addMaxCardToDeck(key) {
+  const add = availableAddCount(key);
+  if (add <= 0) return;
+  const deck = currentDeckDraft();
+  deck[key] = Number(deck[key] || 0) + add;
   renderDeckBuilder();
 }
 
@@ -4639,6 +4727,12 @@ function removeCardFromDeck(key) {
   const current = Number(deck[key] || 0);
   if (current <= 1) delete deck[key];
   else deck[key] = current - 1;
+  renderDeckBuilder();
+}
+
+function removeAllCardFromDeck(key) {
+  const deck = currentDeckDraft();
+  delete deck[key];
   renderDeckBuilder();
 }
 
@@ -4765,7 +4859,9 @@ function renderAuthState() {
   const current = document.querySelector("#authCurrent");
   const logoutButton = document.querySelector("#logoutAuth");
   if (startStatus) startStatus.textContent = authLabel();
-  if (startAuthButton) startAuthButton.textContent = authState.user ? "账号信息" : "登录 / 注册";
+  const startAuthLabel = startAuthButton?.querySelector("span:last-child");
+  if (startAuthLabel) startAuthLabel.textContent = authState.user ? "账号" : "登录";
+  else if (startAuthButton) startAuthButton.textContent = authState.user ? "账号" : "登录";
   if (authButton) authButton.textContent = authState.user ? "账号" : "登录";
   if (authButton) authButton.setAttribute("aria-pressed", String(Boolean(authState.user)));
   if (current) current.textContent = authState.user
@@ -5036,6 +5132,12 @@ function initResultScreen() {
 }
 
 function initPlayerDataUi() {
+  document.querySelectorAll("[data-deck-source]").forEach((button) => {
+    button.addEventListener("click", () => {
+      playerDataState.deckSource = button.dataset.deckSource || "owned";
+      renderDeckBuilder();
+    });
+  });
   document.querySelectorAll("[data-deck-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       const filter = button.dataset.deckFilter;

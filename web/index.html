@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=137" />
+    <link rel="stylesheet" href="./styles.css?v=139" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -103,16 +103,16 @@
 
       body.start-mode .start-actions {
         display: grid;
-        gap: 11px;
-        width: min(330px, 100%);
+        gap: 10px;
+        width: min(360px, 100%);
       }
 
       body.start-mode .primary-action,
       body.start-mode .secondary-action {
         width: 100%;
-        min-height: 50px;
+        min-height: 46px;
         border-radius: 8px;
-        font-size: 17px;
+        font-size: 15px;
       }
 
       body.start-mode .primary-action {
@@ -147,13 +147,38 @@
         </div>
         <div class="start-actions">
           <div id="startAccountStatus" class="account-status">游客模式</div>
-          <button id="startGameBtn" class="primary-action" type="button">开始游戏</button>
-          <button id="startAuthBtn" class="secondary-action" type="button">登录 / 注册</button>
-          <button id="deckBuilderBtn" class="secondary-action account-action" type="button" hidden>整理卡组</button>
-          <button id="shopBtn" class="secondary-action account-action" type="button" hidden>商店</button>
-          <button id="tutorialBtn" class="secondary-action" type="button">新手关卡</button>
-          <button id="startRulesBtn" class="secondary-action" type="button">游戏规则</button>
-          <button id="startAiBtn" class="secondary-action" type="button">AI 设置</button>
+          <button id="startGameBtn" class="primary-action start-play-action" type="button">
+            <span class="start-icon" aria-hidden="true">▶</span>
+            <span>开始游戏</span>
+          </button>
+          <div class="start-feature-grid">
+            <button id="deckBuilderBtn" class="secondary-action account-action start-feature-card" type="button" hidden>
+              <span class="start-icon" aria-hidden="true">▣</span>
+              <span>整理卡组</span>
+            </button>
+            <button id="shopBtn" class="secondary-action account-action start-feature-card" type="button" hidden>
+              <span class="start-icon" aria-hidden="true">◆</span>
+              <span>商店</span>
+            </button>
+          </div>
+          <div class="start-utility-row">
+            <button id="startAuthBtn" class="secondary-action start-tool-action" type="button">
+              <span class="start-icon" aria-hidden="true">人</span>
+              <span>登录</span>
+            </button>
+            <button id="tutorialBtn" class="secondary-action start-tool-action" type="button">
+              <span class="start-icon" aria-hidden="true">练</span>
+              <span>新手</span>
+            </button>
+            <button id="startRulesBtn" class="secondary-action start-tool-action" type="button">
+              <span class="start-icon" aria-hidden="true">?</span>
+              <span>规则</span>
+            </button>
+            <button id="startAiBtn" class="secondary-action start-tool-action" type="button">
+              <span class="start-icon" aria-hidden="true">AI</span>
+              <span>对手</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -445,19 +470,23 @@
           <button type="button" data-deck-filter="type" data-value="destroy">销毁</button>
         </div>
         <div class="deck-builder">
-          <section class="deck-pane">
-            <div class="deck-pane-head">
-              <strong>收藏</strong>
-              <span id="collectionSummary">0 张</span>
-            </div>
-            <div id="deckCollection" class="collection-grid deck-card-list"></div>
-          </section>
-          <section class="deck-pane">
+          <section class="deck-pane deck-pane-current">
             <div class="deck-pane-head">
               <strong>当前卡组</strong>
               <span id="deckCountSummary">0 张</span>
             </div>
             <div id="deckCards" class="collection-grid deck-card-list"></div>
+          </section>
+          <section class="deck-pane deck-pane-source">
+            <div class="deck-pane-head">
+              <strong id="deckSourceTitle">我的收藏</strong>
+              <span id="collectionSummary">0 张</span>
+            </div>
+            <div class="deck-source-tabs" role="tablist" aria-label="卡牌来源">
+              <button type="button" class="active" data-deck-source="owned">我的收藏</button>
+              <button type="button" data-deck-source="pack">补充包池</button>
+            </div>
+            <div id="deckCollection" class="collection-grid deck-card-list"></div>
           </section>
         </div>
         <div class="target-list">
@@ -489,11 +518,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=137"></script>
+    <script src="./app.js?v=139"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=137").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=139").catch(() => {});
         });
       }
     </script>
