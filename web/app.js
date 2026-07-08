@@ -4536,14 +4536,13 @@ function renderDeckBuilder() {
   const valid = isDeckValid(deck);
   if (deckSummary) deckSummary.textContent = `收藏 ${collectionCount(profile)} 张 · 当前卡组 ${total} 张`;
   if (deckStatus) {
-    deckStatus.textContent = deckRuleText(deck);
+    deckStatus.textContent = `${deckRuleText(deck)} · ${deckFilterText().replace(/^筛选：/, "筛选 ")}`;
     deckStatus.classList.toggle("valid", valid);
     deckStatus.classList.toggle("invalid", !valid);
   }
   document.querySelectorAll("[data-deck-tab]").forEach((button) => {
     button.classList.toggle("active", button.dataset.deckTab === playerDataState.deckTab);
   });
-  renderDeckFilterLabel();
   pruneDeckSelections();
   renderDeckTabActions(valid);
   renderDeckTabCards();
@@ -4554,11 +4553,6 @@ function deckFilterText() {
   const elementText = element === "all" ? "全部" : element === "core" ? "阵眼" : LABEL[element] || "全部";
   const typeText = type === "all" ? "全部类型" : TYPE[type] || (type === "defense" ? "防反" : "全部类型");
   return `筛选：${elementText} / ${typeText}`;
-}
-
-function renderDeckFilterLabel() {
-  const label = document.querySelector("#deckFilterLabel");
-  if (label) label.textContent = deckFilterText();
 }
 
 function setDeckFilterPanel(open) {
@@ -5242,9 +5236,9 @@ function initPlayerDataUi() {
   });
   document.querySelector("#closeDeckFilters")?.addEventListener("click", () => setDeckFilterPanel(false));
   document.querySelector("#deckPage")?.addEventListener("click", (event) => {
-    const popover = document.querySelector(".deck-filter-popover");
     const panel = document.querySelector("#deckFilterPanel");
-    if (panel?.hidden || popover?.contains(event.target)) return;
+    const toggle = document.querySelector("#toggleDeckFilters");
+    if (panel?.hidden || panel?.contains(event.target) || toggle?.contains(event.target)) return;
     setDeckFilterPanel(false);
   });
   document.querySelector("#closeDeckPage")?.addEventListener("click", closeDeckPage);
@@ -5261,7 +5255,6 @@ function initPlayerDataUi() {
       document.querySelectorAll(`[data-deck-filter="${filter}"]`).forEach((node) => {
         node.classList.toggle("active", node === button);
       });
-      renderDeckFilterLabel();
       renderDeckBuilder();
     });
   });
