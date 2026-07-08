@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=131" />
+    <link rel="stylesheet" href="./styles.css?v=132" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -146,7 +146,9 @@
           <p>五行生克，六槽布阵。以灵力破阵，以联协守命。</p>
         </div>
         <div class="start-actions">
+          <div id="startAccountStatus" class="account-status">游客模式</div>
           <button id="startGameBtn" class="primary-action" type="button">开始游戏</button>
+          <button id="startAuthBtn" class="secondary-action" type="button">登录 / 注册</button>
           <button id="tutorialBtn" class="secondary-action" type="button">新手关卡</button>
           <button id="startRulesBtn" class="secondary-action" type="button">游戏规则</button>
           <button id="startAiBtn" class="secondary-action" type="button">AI 设置</button>
@@ -225,6 +227,7 @@
             <div class="utility-grid">
               <button id="rulesBtn" class="music-toggle" type="button">规则</button>
               <button id="restartBtn" class="music-toggle" type="button">重开</button>
+              <button id="authBtn" class="music-toggle" type="button">登录</button>
               <button id="aiSettingsBtn" class="music-toggle" type="button">AI设置</button>
               <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">乐 Off</button>
             </div>
@@ -371,14 +374,46 @@
       </form>
     </dialog>
 
+    <dialog id="authDialog">
+      <form id="authForm" method="dialog">
+        <h2>玩家账号</h2>
+        <div class="auth-tabs" role="tablist" aria-label="账号操作">
+          <button id="loginTab" type="button" class="auth-tab active" data-auth-mode="login">登录</button>
+          <button id="registerTab" type="button" class="auth-tab" data-auth-mode="register">注册</button>
+        </div>
+        <p id="authCurrent" class="trigger-text">当前为游客模式。</p>
+        <label class="field-line">
+          <span>手机号</span>
+          <input id="authPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="用于登录" />
+        </label>
+        <label id="authNicknameLine" class="field-line" hidden>
+          <span>昵称</span>
+          <input id="authNickname" type="text" maxlength="18" autocomplete="nickname" placeholder="阵师名" />
+        </label>
+        <label class="field-line">
+          <span>密码</span>
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="至少 6 位" />
+        </label>
+        <label id="authInviteLine" class="field-line" hidden>
+          <span>邀请码</span>
+          <input id="authInviteCode" type="text" autocomplete="off" placeholder="输入邀请后才可注册" />
+        </label>
+        <div class="target-list">
+          <button id="submitAuth" type="submit">登录</button>
+          <button id="logoutAuth" class="secondary" type="button" hidden>退出登录</button>
+          <button id="closeAuth" class="secondary" type="button">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=131"></script>
+    <script src="./app.js?v=132"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=131").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=132").catch(() => {});
         });
       }
     </script>

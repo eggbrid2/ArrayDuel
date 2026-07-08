@@ -165,6 +165,7 @@ const DEFAULT_AI_CONFIG = {
   baseUrl: "./ai-proxy.php",
   model: "gpt-5.5",
 };
+const AUTH_ENDPOINT = "./auth.php";
 const VICTORY_MESSAGES_ENDPOINT = "./victory-messages.php";
 const DEFEAT_TAUNTS = [
   "你这阵法松得像没结印，连我的起手式都没逼出来。",
@@ -324,6 +325,11 @@ const aiState = {
   failedThisTurn: false,
   lastTauntAt: 0,
   tauntInFlight: false,
+};
+
+const authState = {
+  user: null,
+  mode: "login",
 };
 
 function createSide(name) {
@@ -3460,7 +3466,7 @@ function showResultScreen(result) {
     if (panel) panel.hidden = true;
     const name = document.querySelector("#victoryName");
     const message = document.querySelector("#victoryMessage");
-    if (name) name.value = localStorage.getItem("arrayDuelVictoryName") || "";
+    if (name) name.value = authState.user?.nickname || localStorage.getItem("arrayDuelVictoryName") || "";
     if (message) message.value = "";
   }
 }
@@ -4253,6 +4259,112 @@ document.querySelector("#tutorialHelpBtn")?.addEventListener("click", () => show
 window.addEventListener("resize", () => renderTutorialGuide());
 window.addEventListener("scroll", () => renderTutorialGuide(), true);
 
+function authLabel() {
+  if (!authState.user) return "游客模式";
+  return `${authState.user.nickname} · ${authState.user.phoneTail}`;
+}
+
+function renderAuthState() {
+  const startStatus = document.querySelector("#startAccountStatus");
+  const startAuthButton = document.querySelector("#startAuthBtn");
+  const authButton = document.querySelector("#authBtn");
+  const current = document.querySelector("#authCurrent");
+  const logoutButton = document.querySelector("#logoutAuth");
+  if (startStatus) startStatus.textContent = authLabel();
+  if (startAuthButton) startAuthButton.textContent = authState.user ? "账号信息" : "登录 / 注册";
+  if (authButton) authButton.textContent = authState.user ? "账号" : "登录";
+  if (authButton) authButton.setAttribute("aria-pressed", String(Boolean(authState.user)));
+  if (current) current.textContent = authState.user
+    ? `当前账号：${authState.user.nickname}（尾号 ${authState.user.phoneTail}）`
+    : "当前为游客模式。";
+  if (logoutButton) logoutButton.hidden = !authState.user;
+}
+
+function setAuthMode(mode) {
+  authState.mode = mode;
+  document.querySelectorAll("[data-auth-mode]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.authMode === mode);
+  });
+  const nicknameLine = document.querySelector("#authNicknameLine");
+  const inviteLine = document.querySelector("#authInviteLine");
+  const submitButton = document.querySelector("#submitAuth");
+  const password = document.querySelector("#authPassword");
+  if (nicknameLine) nicknameLine.hidden = mode !== "register";
+  if (inviteLine) inviteLine.hidden = mode !== "register";
+  if (submitButton) submitButton.textContent = mode === "register" ? "注册" : "登录";
+  if (password) password.autocomplete = mode === "register" ? "new-password" : "current-password";
+}
+
+async function requestAuth(action, payload = {}) {
+  const response = await fetch(`${AUTH_ENDPOINT}?action=${encodeURIComponent(action)}`, {
+    method: action === "status" ? "GET" : "POST",
+    headers: action === "status" ? undefined : { "Content-Type": "application/json" },
+    body: action === "status" ? undefined : JSON.stringify(payload),
+    cache: "no-store",
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "账号请求失败");
+  authState.user = data.user || null;
+  renderAuthState();
+  return data;
+}
+
+function openAuthDialog(mode = authState.user ? "login" : "login") {
+  setAuthMode(mode);
+  renderAuthState();
+  document.querySelector("#authDialog")?.showModal();
+}
+
+function initAuth() {
+  const dialog = document.querySelector("#authDialog");
+  const form = document.querySelector("#authForm");
+  const closeButton = document.querySelector("#closeAuth");
+  const logoutButton = document.querySelector("#logoutAuth");
+  const startAuthButton = document.querySelector("#startAuthBtn");
+  const authButton = document.querySelector("#authBtn");
+  if (!dialog || !form) return;
+
+  document.querySelectorAll("[data-auth-mode]").forEach((button) => {
+    button.addEventListener("click", () => setAuthMode(button.dataset.authMode || "login"));
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const phone = document.querySelector("#authPhone")?.value.trim() || "";
+    const password = document.querySelector("#authPassword")?.value || "";
+    const nickname = document.querySelector("#authNickname")?.value.trim() || "";
+    const inviteCode = document.querySelector("#authInviteCode")?.value.trim() || "";
+    const submitButton = document.querySelector("#submitAuth");
+    if (submitButton) submitButton.disabled = true;
+    try {
+      await requestAuth(authState.mode, { phone, password, nickname, inviteCode });
+      dialog.close();
+      showToast(authState.mode === "register" ? "注册成功，已登录。" : "登录成功。", "log-burst");
+    } catch (error) {
+      showToast(error.message || "账号操作失败。", "log-destroy", "minor");
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+
+  logoutButton?.addEventListener("click", async () => {
+    try {
+      await requestAuth("logout");
+      dialog.close();
+      showToast("已退出登录。", "log-phase", "minor");
+    } catch {
+      showToast("退出失败，请稍后再试。", "log-destroy", "minor");
+    }
+  });
+
+  closeButton?.addEventListener("click", () => dialog.close());
+  startAuthButton?.addEventListener("click", () => openAuthDialog());
+  authButton?.addEventListener("click", () => openAuthDialog());
+  setAuthMode("login");
+  renderAuthState();
+  requestAuth("status").catch(() => renderAuthState());
+}
+
 function initStartScreen() {
   const startScreen = document.querySelector("#startScreen");
   const gameShell = document.querySelector("#gameShell");
@@ -4492,6 +4604,7 @@ function initMusic() {
   });
 }
 
+initAuth();
 initAiSettings();
 initStartScreen();
 initResultScreen();

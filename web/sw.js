@@ -1,4 +1,4 @@
-const CACHE_NAME = "array-duel-v131";
+const CACHE_NAME = "array-duel-v132";
 const ASSETS = [
   "./",
   "./index.html",
@@ -162,7 +162,8 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  if (new URL(event.request.url).pathname.endsWith("/victory-messages.php")) return;
+  const path = new URL(event.request.url).pathname;
+  if (path.endsWith("/victory-messages.php") || path.endsWith("/auth.php")) return;
   event.respondWith(
     fetch(event.request).then((response) => {
         const copy = response.clone();
