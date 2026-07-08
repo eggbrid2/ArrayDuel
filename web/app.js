@@ -4543,9 +4543,30 @@ function renderDeckBuilder() {
   document.querySelectorAll("[data-deck-tab]").forEach((button) => {
     button.classList.toggle("active", button.dataset.deckTab === playerDataState.deckTab);
   });
+  renderDeckFilterLabel();
   pruneDeckSelections();
   renderDeckTabActions(valid);
   renderDeckTabCards();
+}
+
+function deckFilterText() {
+  const { element, type } = playerDataState.deckFilters;
+  const elementText = element === "all" ? "全部" : element === "core" ? "阵眼" : LABEL[element] || "全部";
+  const typeText = type === "all" ? "全部类型" : TYPE[type] || (type === "defense" ? "防反" : "全部类型");
+  return `筛选：${elementText} / ${typeText}`;
+}
+
+function renderDeckFilterLabel() {
+  const label = document.querySelector("#deckFilterLabel");
+  if (label) label.textContent = deckFilterText();
+}
+
+function setDeckFilterPanel(open) {
+  const panel = document.querySelector("#deckFilterPanel");
+  const toggle = document.querySelector("#toggleDeckFilters");
+  if (!panel || !toggle) return;
+  panel.hidden = !open;
+  toggle.setAttribute("aria-expanded", String(open));
 }
 
 function activeDeckSelection() {
@@ -5195,6 +5216,17 @@ function initResultScreen() {
 }
 
 function initPlayerDataUi() {
+  document.querySelector("#toggleDeckFilters")?.addEventListener("click", () => {
+    const panel = document.querySelector("#deckFilterPanel");
+    setDeckFilterPanel(Boolean(panel?.hidden));
+  });
+  document.querySelector("#closeDeckFilters")?.addEventListener("click", () => setDeckFilterPanel(false));
+  document.querySelector("#deckDialog")?.addEventListener("click", (event) => {
+    const popover = document.querySelector(".deck-filter-popover");
+    const panel = document.querySelector("#deckFilterPanel");
+    if (panel?.hidden || popover?.contains(event.target)) return;
+    setDeckFilterPanel(false);
+  });
   document.querySelectorAll("[data-deck-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       switchDeckTab(button.dataset.deckTab || "deck");
@@ -5208,6 +5240,7 @@ function initPlayerDataUi() {
       document.querySelectorAll(`[data-deck-filter="${filter}"]`).forEach((node) => {
         node.classList.toggle("active", node === button);
       });
+      renderDeckFilterLabel();
       renderDeckBuilder();
     });
   });
