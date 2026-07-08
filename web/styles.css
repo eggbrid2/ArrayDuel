@@ -2385,7 +2385,7 @@ dialog h2::before {
 
 .deck-card-list {
   grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
-  max-height: min(32svh, 300px);
+  max-height: min(50svh, 520px);
   padding: 7px;
   border: 1px solid rgba(229, 197, 116, 0.16);
   border-radius: 8px;
@@ -2418,44 +2418,57 @@ dialog h2::before {
   text-align: center;
 }
 
-.deck-pane-current .deck-card-list {
-  display: flex;
-  max-height: 194px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-}
-
-.deck-pane-current .deck-mini-card {
-  flex: 0 0 96px;
-  scroll-snap-align: start;
-}
-
-.deck-source-tabs {
+.deck-view-tabs {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
-.deck-source-tabs button {
-  min-height: 34px;
+.deck-view-tabs button {
+  min-height: 46px;
   border: 1px solid rgba(229, 197, 116, 0.22);
   border-radius: 8px;
   background: rgba(255, 253, 247, 0.07);
   color: rgba(255, 253, 247, 0.74);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 900;
 }
 
-.deck-source-tabs button.active {
+.deck-view-tabs button.active {
   border-color: rgba(247, 213, 108, 0.7);
   background: linear-gradient(180deg, rgba(255, 230, 157, 0.96), rgba(185, 133, 53, 0.96));
   color: #17140c;
 }
 
+.deck-tab-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.deck-tab-actions button {
+  min-height: 38px;
+  border: 1px solid rgba(229, 197, 116, 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(53, 72, 57, 0.94), rgba(23, 31, 28, 0.96));
+  color: rgba(255, 253, 247, 0.9);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.deck-tab-actions button:disabled {
+  opacity: 0.48;
+}
+
 .deck-mini-card.is-muted {
   opacity: 0.58;
+}
+
+.deck-mini-card.is-selected .deck-card-preview {
+  outline: 3px solid #f7d56c;
+  outline-offset: 2px;
+  box-shadow: inset 0 0 0 2px rgba(53, 37, 19, 0.18), inset 0 0 0 5px rgba(255, 253, 247, 0.22), 0 0 0 3px rgba(20, 24, 21, 0.9), 0 0 18px rgba(247, 213, 108, 0.42);
 }
 
 .deck-card-preview {
@@ -2473,6 +2486,31 @@ dialog h2::before {
   text-align: center;
   overflow: hidden;
   box-shadow: inset 0 0 0 2px rgba(53, 37, 19, 0.18), inset 0 0 0 5px rgba(255, 253, 247, 0.22), 0 5px 10px rgba(0, 0, 0, 0.18);
+}
+
+.deck-select-mark {
+  position: absolute;
+  left: 50%;
+  bottom: 57px;
+  z-index: 4;
+  display: grid !important;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  margin: 0 !important;
+  border: 1px solid rgba(255, 253, 247, 0.72);
+  border-radius: 50%;
+  background: rgba(19, 24, 22, 0.82);
+  transform: translateX(-50%);
+}
+
+.deck-mini-card.is-selected .deck-select-mark::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f7d56c;
+  box-shadow: 0 0 8px rgba(247, 213, 108, 0.74);
 }
 
 .deck-card-preview::before {
@@ -2592,26 +2630,6 @@ dialog h2::before {
   color: #fffdf7 !important;
   font-size: 10px !important;
   font-weight: 950;
-}
-
-.deck-card-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-}
-
-.deck-card-actions:empty {
-  display: none;
-}
-
-.deck-card-actions button {
-  min-height: 28px;
-  border: 1px solid rgba(229, 197, 116, 0.28);
-  border-radius: 7px;
-  background: rgba(24, 32, 29, 0.88);
-  color: #fffdf7;
-  font-size: 11px;
-  font-weight: 900;
 }
 
 .shop-item {

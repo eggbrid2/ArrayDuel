@@ -9,7 +9,7 @@
     <title>斗阵 · Array Duel</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=139" />
+    <link rel="stylesheet" href="./styles.css?v=140" />
     <style>
       body.start-mode {
         min-height: 100svh;
@@ -470,28 +470,21 @@
           <button type="button" data-deck-filter="type" data-value="destroy">销毁</button>
         </div>
         <div class="deck-builder">
-          <section class="deck-pane deck-pane-current">
+          <div class="deck-view-tabs" role="tablist" aria-label="卡组编辑区">
+            <button type="button" class="active" data-deck-tab="deck">卡组内</button>
+            <button type="button" data-deck-tab="owned">我的收藏</button>
+            <button type="button" data-deck-tab="pack">补充包池</button>
+          </div>
+          <section class="deck-pane deck-pane-active">
             <div class="deck-pane-head">
-              <strong>当前卡组</strong>
-              <span id="deckCountSummary">0 张</span>
+              <strong id="deckPaneTitle">当前卡组</strong>
+              <span id="deckPaneSummary">0 张</span>
             </div>
-            <div id="deckCards" class="collection-grid deck-card-list"></div>
-          </section>
-          <section class="deck-pane deck-pane-source">
-            <div class="deck-pane-head">
-              <strong id="deckSourceTitle">我的收藏</strong>
-              <span id="collectionSummary">0 张</span>
-            </div>
-            <div class="deck-source-tabs" role="tablist" aria-label="卡牌来源">
-              <button type="button" class="active" data-deck-source="owned">我的收藏</button>
-              <button type="button" data-deck-source="pack">补充包池</button>
-            </div>
-            <div id="deckCollection" class="collection-grid deck-card-list"></div>
+            <div id="deckTabActions" class="deck-tab-actions" aria-label="当前操作"></div>
+            <div id="deckCardGrid" class="collection-grid deck-card-list"></div>
           </section>
         </div>
         <div class="target-list">
-          <button id="saveDeck" type="button">保存卡组</button>
-          <button id="resetDeck" type="button">重置默认</button>
           <button id="refreshDeck" type="button">刷新资产</button>
           <button class="secondary" type="submit">关闭</button>
         </div>
@@ -518,11 +511,11 @@
     <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="false"></div>
     <audio id="bgm" src="./assets/xianxia-duel-aigei.mp3" preload="auto" loop></audio>
 
-    <script src="./app.js?v=139"></script>
+    <script src="./app.js?v=140"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=139").catch(() => {});
+          navigator.serviceWorker.register("./sw.js?v=140").catch(() => {});
         });
       }
     </script>

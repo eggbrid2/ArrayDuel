@@ -441,7 +441,12 @@ const playerDataState = {
   profile: null,
   loading: false,
   deckDraft: {},
-  deckSource: "owned",
+  deckTab: "deck",
+  deckSelections: {
+    deck: new Set(),
+    owned: new Set(),
+    pack: new Set(),
+  },
   deckFilters: {
     element: "all",
     type: "all",
@@ -4527,10 +4532,6 @@ function renderDeckBuilder() {
   const deck = currentDeckDraft();
   const deckStatus = document.querySelector("#deckStatus");
   const deckSummary = document.querySelector("#deckSummary");
-  const collectionSummary = document.querySelector("#collectionSummary");
-  const deckCountSummary = document.querySelector("#deckCountSummary");
-  const sourceTitle = document.querySelector("#deckSourceTitle");
-  const saveButton = document.querySelector("#saveDeck");
   const total = countMapTotal(deck);
   const valid = isDeckValid(deck);
   if (deckSummary) deckSummary.textContent = `收藏 ${collectionCount(profile)} 张 · 当前卡组 ${total} 张`;
@@ -4539,93 +4540,124 @@ function renderDeckBuilder() {
     deckStatus.classList.toggle("valid", valid);
     deckStatus.classList.toggle("invalid", !valid);
   }
-  if (collectionSummary) {
-    collectionSummary.textContent = playerDataState.deckSource === "pack"
-      ? `${allCollectibleCards().length} 种`
-      : `${collectionCount(profile)} 张`;
-  }
-  if (deckCountSummary) deckCountSummary.textContent = `${total} 张`;
-  if (sourceTitle) sourceTitle.textContent = playerDataState.deckSource === "pack" ? "补充包池" : "我的收藏";
-  document.querySelectorAll("[data-deck-source]").forEach((button) => {
-    button.classList.toggle("active", button.dataset.deckSource === playerDataState.deckSource);
+  document.querySelectorAll("[data-deck-tab]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.deckTab === playerDataState.deckTab);
   });
-  if (saveButton) saveButton.disabled = !valid;
-  renderDeckCollection();
-  renderDeckCards();
+  pruneDeckSelections();
+  renderDeckTabActions(valid);
+  renderDeckTabCards();
 }
 
-function renderDeckCollection() {
-  const root = document.querySelector("#deckCollection");
-  if (!root) return;
-  root.innerHTML = "";
+function activeDeckSelection() {
+  const tab = playerDataState.deckTab || "deck";
+  if (!playerDataState.deckSelections[tab]) playerDataState.deckSelections[tab] = new Set();
+  return playerDataState.deckSelections[tab];
+}
+
+function getDeckTabEntries() {
   const collection = playerDataState.profile?.collection || {};
   const deck = currentDeckDraft();
-  const sourceEntries = playerDataState.deckSource === "pack"
-    ? allCollectibleCards().map((card) => [collectibleKey(card), Number(collection[collectibleKey(card)] || 0)])
-    : Object.entries(collection);
-  const cards = sourceEntries
+  const tab = playerDataState.deckTab || "deck";
+  if (tab === "deck") {
+    return Object.entries(deck)
+      .map(([key, count]) => ({ key, count: Number(count || 0), card: cardByKey(key) }))
+      .filter((entry) => entry.card && entry.count > 0 && cardMatchesDeckFilters(entry.card));
+  }
+  if (tab === "pack") {
+    return allCollectibleCards()
+      .map((card) => {
+        const key = collectibleKey(card);
+        return { key, count: Number(collection[key] || 0), card };
+      })
+      .filter((entry) => entry.card && cardMatchesDeckFilters(entry.card));
+  }
+  return Object.entries(collection)
     .map(([key, count]) => ({ key, count: Number(count || 0), card: cardByKey(key) }))
-    .filter((entry) => entry.card && cardMatchesDeckFilters(entry.card))
+    .filter((entry) => {
+      if (!entry.card || !cardMatchesDeckFilters(entry.card)) return false;
+      const inDeck = Number(deck[entry.key] || 0);
+      return entry.count > inDeck && availableAddCount(entry.key) > 0;
+    });
+}
+
+function pruneDeckSelections() {
+  const visible = new Set(getDeckTabEntries().map((entry) => entry.key));
+  activeDeckSelection().forEach((key) => {
+    if (!visible.has(key)) activeDeckSelection().delete(key);
+  });
+}
+
+function renderDeckTabActions(valid) {
+  const root = document.querySelector("#deckTabActions");
+  if (!root) return;
+  root.innerHTML = "";
+  const tab = playerDataState.deckTab || "deck";
+  const entries = getDeckTabEntries();
+  const selectedCount = activeDeckSelection().size;
+  const actions = [];
+  if (tab === "deck") {
+    actions.push(
+      { label: `多选 ${selectedCount}`, onClick: toggleSelectAllVisible },
+      { label: "删除", disabled: selectedCount === 0, onClick: removeSelectedDeckCards },
+      { label: "保存", disabled: !valid, onClick: saveDeckDraft },
+      { label: "重置", onClick: resetDeckDraft },
+    );
+  } else if (tab === "owned") {
+    actions.push(
+      { label: `多选 ${selectedCount}`, onClick: toggleSelectAllVisible },
+      { label: "添加", disabled: selectedCount === 0, onClick: addSelectedOwnedCards },
+    );
+  } else {
+    actions.push(
+      { label: `图鉴 ${entries.length}`, disabled: true },
+      { label: "我的收藏", onClick: () => switchDeckTab("owned") },
+    );
+  }
+  actions.forEach((action) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = action.label;
+    button.disabled = Boolean(action.disabled);
+    button.addEventListener("click", action.onClick);
+    root.append(button);
+  });
+}
+
+function renderDeckTabCards() {
+  const root = document.querySelector("#deckCardGrid");
+  if (!root) return;
+  root.innerHTML = "";
+  const deck = currentDeckDraft();
+  const tab = playerDataState.deckTab || "deck";
+  const title = document.querySelector("#deckPaneTitle");
+  const summary = document.querySelector("#deckPaneSummary");
+  const cards = getDeckTabEntries()
     .sort((a, b) => a.key.localeCompare(b.key, "zh-CN"));
+  if (title) {
+    title.textContent = tab === "deck" ? "当前卡组" : tab === "owned" ? "我的收藏" : "补充包池";
+  }
+  if (summary) {
+    if (tab === "deck") summary.textContent = `${countMapTotal(deck)} 张`;
+    else if (tab === "owned") summary.textContent = `${cards.reduce((sum, entry) => sum + Math.max(0, entry.count - Number(deck[entry.key] || 0)), 0)} 张可加入`;
+    else summary.textContent = `${cards.length} 种`;
+  }
   if (!cards.length) {
-    root.innerHTML = `<p class="trigger-text">没有符合筛选的卡。</p>`;
+    root.innerHTML = `<p class="trigger-text">${tab === "owned" ? "没有可加入的非卡组卡牌。" : "没有符合筛选的卡。"}</p>`;
     return;
   }
   cards.forEach(({ key, count, card }) => {
     const inDeck = Number(deck[key] || 0);
-    const canAdd = inDeck < count && inDeck < DECK_RULES.maxCopies && countMapTotal(deck) < DECK_RULES.max;
-    const canBulkAdd = availableAddCount(key) > 0;
     root.append(createDeckCardNode(card, {
-      count,
-      note: `卡组 ${inDeck}/${Math.min(count, DECK_RULES.maxCopies)}`,
-      muted: playerDataState.deckSource === "pack" && count <= 0,
-      actions: [
-        {
-          label: "+1",
-          title: "加入 1 张",
-          disabled: !canAdd,
-          onClick: () => addCardToDeck(key),
-        },
-        {
-          label: "加满",
-          title: "加入可用数量",
-          disabled: !canBulkAdd,
-          onClick: () => addMaxCardToDeck(key),
-        },
-      ],
-    }));
-  });
-}
-
-function renderDeckCards() {
-  const root = document.querySelector("#deckCards");
-  if (!root) return;
-  root.innerHTML = "";
-  const deck = currentDeckDraft();
-  const cards = Object.entries(deck)
-    .map(([key, count]) => ({ key, count: Number(count || 0), card: cardByKey(key) }))
-    .filter((entry) => entry.card && entry.count > 0)
-    .sort((a, b) => a.key.localeCompare(b.key, "zh-CN"));
-  if (!cards.length) {
-    root.innerHTML = `<p class="trigger-text">还没有加入卡牌。</p>`;
-    return;
-  }
-  cards.forEach(({ key, count, card }) => {
-    root.append(createDeckCardNode(card, {
-      count,
-      note: `${LABEL[card.element] || "中"} · ${TYPE[card.type] || "卡"}`,
-      actions: [
-        {
-          label: "-1",
-          title: "移除 1 张",
-          onClick: () => removeCardFromDeck(key),
-        },
-        {
-          label: "全删",
-          title: "从卡组全部移除",
-          onClick: () => removeAllCardFromDeck(key),
-        },
-      ],
+      key,
+      count: tab === "owned" ? Math.max(0, count - inDeck) : count,
+      note: tab === "deck"
+        ? `${LABEL[card.element] || "中"} · ${TYPE[card.type] || "卡"}`
+        : tab === "owned"
+          ? `可加入 ${Math.max(0, count - inDeck)} · 卡组 ${inDeck}/${Math.min(count, DECK_RULES.maxCopies)}`
+          : `已拥有 ${count} 张`,
+      selectable: tab !== "pack",
+      selected: activeDeckSelection().has(key),
+      muted: tab === "pack" && count <= 0,
     }));
   });
 }
@@ -4636,6 +4668,7 @@ function createDeckCardNode(card, options) {
   item.className = [
     "collection-card",
     "deck-mini-card",
+    options.selected ? "is-selected" : "",
     options.muted ? "is-muted" : "",
   ].filter(Boolean).join(" ");
   item.style.setProperty("--slot-color", COLOR[card.element] || "#e5c574");
@@ -4643,6 +4676,7 @@ function createDeckCardNode(card, options) {
   const valueText = card.type === "eye" ? "阵眼" : `灵力:${card.value || 0}`;
   item.innerHTML = `
     <button class="deck-card-preview" type="button" aria-label="查看${escapeHtml(card.name)}">
+      ${options.selectable ? '<span class="deck-select-mark" aria-hidden="true"></span>' : ""}
       <span class="hand-element">${LABEL[card.element] || "中"}</span>
       <span class="hand-type">${TYPE_MARK[card.type] || "术"}</span>
       <strong>${escapeHtml(card.name)}</strong>
@@ -4655,19 +4689,13 @@ function createDeckCardNode(card, options) {
     </button>
     <small class="card-count-note">${escapeHtml(options.note || "")}</small>
   `;
-  item.querySelector(".deck-card-preview")?.addEventListener("click", () => showCatalogCardDetail(card, options.note || ""));
-  const actions = document.createElement("div");
-  actions.className = "deck-card-actions";
-  (options.actions || []).forEach((action) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = action.label;
-    if (action.title) button.setAttribute("aria-label", action.title);
-    button.disabled = Boolean(action.disabled);
-    button.addEventListener("click", action.onClick);
-    actions.append(button);
+  item.querySelector(".deck-card-preview")?.addEventListener("click", () => {
+    if (options.selectable && !isDoubleCardTap(`deck:${options.key}`)) {
+      toggleDeckCardSelection(options.key);
+      return;
+    }
+    showCatalogCardDetail(card, options.note || "");
   });
-  item.append(actions);
   return item;
 }
 
@@ -4736,6 +4764,43 @@ function removeAllCardFromDeck(key) {
   renderDeckBuilder();
 }
 
+function switchDeckTab(tab) {
+  playerDataState.deckTab = tab || "deck";
+  renderDeckBuilder();
+}
+
+function toggleDeckCardSelection(key) {
+  if (!key) return;
+  const selection = activeDeckSelection();
+  if (selection.has(key)) selection.delete(key);
+  else selection.add(key);
+  renderDeckBuilder();
+}
+
+function toggleSelectAllVisible() {
+  const entries = getDeckTabEntries().filter((entry) => playerDataState.deckTab !== "owned" || availableAddCount(entry.key) > 0);
+  const selection = activeDeckSelection();
+  const allSelected = entries.length > 0 && entries.every((entry) => selection.has(entry.key));
+  if (allSelected) entries.forEach((entry) => selection.delete(entry.key));
+  else entries.forEach((entry) => selection.add(entry.key));
+  renderDeckBuilder();
+}
+
+function removeSelectedDeckCards() {
+  const selection = activeDeckSelection();
+  const deck = currentDeckDraft();
+  selection.forEach((key) => delete deck[key]);
+  selection.clear();
+  renderDeckBuilder();
+}
+
+function addSelectedOwnedCards() {
+  const selection = activeDeckSelection();
+  selection.forEach((key) => addMaxCardToDeck(key));
+  selection.clear();
+  renderDeckBuilder();
+}
+
 function resetDeckDraft() {
   const collection = playerDataState.profile?.collection || {};
   const nextDeck = {};
@@ -4761,8 +4826,6 @@ async function saveDeckDraft() {
     showToast(deckRuleText(deck), "log-destroy", "minor");
     return;
   }
-  const button = document.querySelector("#saveDeck");
-  if (button) button.disabled = true;
   try {
     await requestPlayerData("saveDeck", { deck });
     playerDataState.deckDraft = { ...(playerDataState.profile?.deck || deck) };
@@ -5132,10 +5195,9 @@ function initResultScreen() {
 }
 
 function initPlayerDataUi() {
-  document.querySelectorAll("[data-deck-source]").forEach((button) => {
+  document.querySelectorAll("[data-deck-tab]").forEach((button) => {
     button.addEventListener("click", () => {
-      playerDataState.deckSource = button.dataset.deckSource || "owned";
-      renderDeckBuilder();
+      switchDeckTab(button.dataset.deckTab || "deck");
     });
   });
   document.querySelectorAll("[data-deck-filter]").forEach((button) => {
@@ -5149,8 +5211,6 @@ function initPlayerDataUi() {
       renderDeckBuilder();
     });
   });
-  document.querySelector("#saveDeck")?.addEventListener("click", saveDeckDraft);
-  document.querySelector("#resetDeck")?.addEventListener("click", resetDeckDraft);
   document.querySelector("#refreshDeck")?.addEventListener("click", async () => {
     try {
       await loadPlayerProfile();
